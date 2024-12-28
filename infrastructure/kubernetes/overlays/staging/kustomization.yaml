@@ -1,0 +1,169 @@
+# Kustomization configuration for staging environment
+# Version: v5.0.0
+# Dependencies:
+# - kubernetes-sigs/kustomize v5.0.0
+# - Base configurations from ../../base/
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Reference base configurations
+resources:
+- ../../base/ai-service.yaml
+- ../../base/api-gateway.yaml
+- ../../base/message-service.yaml
+
+# Set staging namespace
+namespace: staging
+
+# Common labels for all resources
+commonLabels:
+  environment: staging
+  managed-by: kustomize
+  tier: application
+
+# Resource customizations for staging environment
+patches:
+# AI Service customization - 25% of production capacity
+- target:
+    kind: Deployment
+    name: ai-service
+  patch: |
+    - op: replace
+      path: /spec/replicas
+      value: 2
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/cpu
+      value: 250m
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/memory
+      value: 512Mi
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/limits/cpu
+      value: 500m
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/limits/memory
+      value: 1Gi
+
+# API Gateway customization - reduced capacity for staging
+- target:
+    kind: Deployment
+    name: api-gateway
+  patch: |
+    - op: replace
+      path: /spec/replicas
+      value: 2
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/cpu
+      value: 100m
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/memory
+      value: 256Mi
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/limits/cpu
+      value: 200m
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/limits/memory
+      value: 512Mi
+
+# Message Service customization - reduced scaling for staging
+- target:
+    kind: Deployment
+    name: message-service
+  patch: |
+    - op: replace
+      path: /spec/replicas
+      value: 2
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/cpu
+      value: 250m
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/memory
+      value: 512Mi
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/limits/cpu
+      value: 500m
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/limits/memory
+      value: 1Gi
+
+# ConfigMap generation for staging environment
+configMapGenerator:
+- name: staging-config
+  literals:
+  - ENVIRONMENT=staging
+  - LOG_LEVEL=debug
+  - ENABLE_DEBUGGING=true
+
+# HPA customizations for staging environment
+patches:
+- target:
+    kind: HorizontalPodAutoscaler
+    name: ai-service-hpa
+  patch: |
+    - op: replace
+      path: /spec/minReplicas
+      value: 2
+    - op: replace
+      path: /spec/maxReplicas
+      value: 4
+
+- target:
+    kind: HorizontalPodAutoscaler
+    name: api-gateway-hpa
+  patch: |
+    - op: replace
+      path: /spec/minReplicas
+      value: 2
+    - op: replace
+      path: /spec/maxReplicas
+      value: 4
+
+- target:
+    kind: HorizontalPodAutoscaler
+    name: message-service-hpa
+  patch: |
+    - op: replace
+      path: /spec/minReplicas
+      value: 2
+    - op: replace
+      path: /spec/maxReplicas
+      value: 4
+
+# Resource quotas for staging namespace
+resources:
+- |-
+  apiVersion: v1
+  kind: ResourceQuota
+  metadata:
+    name: staging-quota
+  spec:
+    hard:
+      requests.cpu: "2"
+      requests.memory: 4Gi
+      limits.cpu: "4"
+      limits.memory: 8Gi
+      pods: "20"
+
+# Network policies for staging environment
+resources:
+- |-
+  apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: staging-network-policy
+  spec:
+    podSelector: {}
+    policyTypes:
+    - Ingress
+    - Egress
+    ingress:
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            name: staging
+    egress:
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: staging
