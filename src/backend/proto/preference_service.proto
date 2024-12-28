@@ -1,0 +1,123 @@
+syntax = "proto3";
+
+package preference.v1;
+
+import "google/protobuf/timestamp.proto"; // v3.0+
+
+option go_package = "preference/v1/proto";
+option java_package = "com.aichat.preference.v1";
+option java_multiple_files = true;
+
+// PreferenceService provides comprehensive preference management and learning capabilities
+service PreferenceService {
+  // UpdatePreference updates user preferences and triggers the adaptive learning process
+  rpc UpdatePreference(UpdatePreferenceRequest) returns (UpdatePreferenceResponse) {}
+  
+  // GetPreferences retrieves user preferences with advanced filtering and pattern analysis
+  rpc GetPreferences(GetPreferencesRequest) returns (GetPreferencesResponse) {}
+  
+  // RecordInteraction records and analyzes user interaction with AI agents for pattern learning
+  rpc RecordInteraction(RecordInteractionRequest) returns (RecordInteractionResponse) {}
+}
+
+// Defines the type of preference being managed
+enum PreferenceType {
+  PREFERENCE_TYPE_UNSPECIFIED = 0;
+  PREFERENCE_TYPE_UI = 1;
+  PREFERENCE_TYPE_NOTIFICATION = 2;
+  PREFERENCE_TYPE_AI_INTERACTION = 3;
+  PREFERENCE_TYPE_CONTENT = 4;
+  PREFERENCE_TYPE_PRIVACY = 5;
+}
+
+// Represents a single preference value with metadata
+message PreferenceValue {
+  string key = 1;
+  oneof value {
+    string string_value = 2;
+    bool bool_value = 3;
+    int32 int_value = 4;
+    double double_value = 5;
+  }
+  double confidence_score = 6;
+  google.protobuf.Timestamp last_updated = 7;
+  map<string, string> metadata = 8;
+}
+
+// Request to update user preferences
+message UpdatePreferenceRequest {
+  string user_id = 1;
+  PreferenceType preference_type = 2;
+  repeated PreferenceValue preferences = 3;
+  string context = 4;
+  map<string, string> metadata = 5;
+}
+
+// Response from preference update operation
+message UpdatePreferenceResponse {
+  enum Status {
+    STATUS_UNSPECIFIED = 0;
+    STATUS_SUCCESS = 1;
+    STATUS_PARTIAL = 2;
+    STATUS_FAILED = 3;
+  }
+  Status status = 1;
+  repeated string updated_keys = 2;
+  repeated string failed_keys = 3;
+  double confidence_score = 4;
+  map<string, string> processing_metadata = 5;
+  google.protobuf.Timestamp processed_at = 6;
+}
+
+// Request to retrieve user preferences
+message GetPreferencesRequest {
+  string user_id = 1;
+  repeated PreferenceType preference_types = 2;
+  repeated string keys = 3;
+  bool include_metadata = 4;
+  bool include_analysis = 5;
+  map<string, string> filters = 6;
+}
+
+// Response containing user preferences
+message GetPreferencesResponse {
+  message PreferenceGroup {
+    PreferenceType type = 1;
+    repeated PreferenceValue preferences = 2;
+    double group_confidence_score = 3;
+    map<string, string> group_metadata = 4;
+  }
+  repeated PreferenceGroup preference_groups = 1;
+  map<string, string> analysis_results = 2;
+  google.protobuf.Timestamp retrieved_at = 3;
+}
+
+// Represents an interaction event for pattern learning
+message InteractionEvent {
+  string event_id = 1;
+  string user_id = 2;
+  string agent_id = 3;
+  string interaction_type = 4;
+  map<string, string> context = 5;
+  double satisfaction_score = 6;
+  google.protobuf.Timestamp occurred_at = 7;
+  repeated string tags = 8;
+}
+
+// Request to record user interaction
+message RecordInteractionRequest {
+  InteractionEvent event = 1;
+  bool analyze_patterns = 2;
+  bool update_learning_model = 3;
+  map<string, string> metadata = 4;
+}
+
+// Response from interaction recording
+message RecordInteractionResponse {
+  string event_id = 1;
+  map<string, double> pattern_scores = 2;
+  repeated string identified_patterns = 3;
+  map<string, string> learning_updates = 4;
+  map<string, string> insights = 5;
+  google.protobuf.Timestamp processed_at = 6;
+}
