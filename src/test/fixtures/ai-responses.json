@@ -1,0 +1,129 @@
+{
+  "ai_responses": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "agentId": "explorer-agent-1",
+      "messageId": "msg-001",
+      "content": "Based on your location near the Louvre, I recommend visiting the hidden gem Palais Royal Gardens. It's less crowded than the Tuileries and offers beautiful photo opportunities with its iconic striped columns. The garden cafes are perfect for a morning coffee break.",
+      "timestamp": "2024-01-20T10:30:00.000Z",
+      "metadata": {
+        "type": "AI_RESPONSE",
+        "agent_type": "explorer",
+        "confidence_score": 0.92,
+        "context": {
+          "tokens": ["Louvre", "morning", "activities", "photo", "quiet"],
+          "relevant_history": ["msg-001", "msg-002"],
+          "user_preferences": {
+            "activity_level": "moderate",
+            "crowd_preference": "less crowded",
+            "photo_opportunities": "high"
+          }
+        },
+        "response_type": "recommendation",
+        "specialties_used": ["local_attractions", "cultural_sites"],
+        "processing_time": 234,
+        "source_references": ["paris_attractions_db", "visitor_reviews"]
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440001",
+      "agentId": "foodie-agent-1",
+      "messageId": "msg-003",
+      "content": "For your group of 6 with one vegetarian diner, I suggest Bistrot Vivienne. They offer excellent French cuisine with dedicated vegetarian options. Their prix fixe menu is €35/person, which fits your budget. I recommend booking for 7:30 PM to enjoy the beautiful gallery setting.",
+      "timestamp": "2024-01-20T10:31:00.000Z",
+      "metadata": {
+        "type": "AI_RESPONSE",
+        "agent_type": "foodie",
+        "confidence_score": 0.95,
+        "context": {
+          "tokens": ["dinner", "vegetarian", "French", "budget", "group"],
+          "relevant_history": ["msg-003", "msg-004"],
+          "user_preferences": {
+            "dietary_restrictions": ["vegetarian"],
+            "price_range": "moderate",
+            "cuisine_type": "French"
+          }
+        },
+        "response_type": "recommendation",
+        "specialties_used": ["restaurant_selection", "dietary_accommodation"],
+        "processing_time": 189,
+        "source_references": ["restaurant_db", "menu_archive"]
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440002",
+      "agentId": "planner-agent-1",
+      "messageId": "msg-005",
+      "content": "I've analyzed your group's preferences and created an optimized itinerary for tomorrow: \n9:00 AM - Louvre (pre-booked tickets to avoid queues)\n12:30 PM - Lunch at Bistrot Vivienne\n2:00 PM - Palais Royal Gardens\n4:00 PM - Seine River Cruise\n7:30 PM - Dinner at L'Ami Louis\n\nThis schedule accounts for walking distances and museum peak hours.",
+      "timestamp": "2024-01-20T10:32:00.000Z",
+      "metadata": {
+        "type": "AI_RESPONSE",
+        "agent_type": "planner",
+        "confidence_score": 0.88,
+        "context": {
+          "tokens": ["itinerary", "schedule", "museum", "walking", "dinner"],
+          "relevant_history": ["msg-005", "msg-006", "msg-007"],
+          "user_preferences": {
+            "pace": "moderate",
+            "walking_distance": "up to 2km",
+            "interests": ["art", "history", "food"]
+          }
+        },
+        "response_type": "suggestion",
+        "specialties_used": ["itinerary_optimization", "time_management"],
+        "processing_time": 312,
+        "source_references": ["attraction_hours_db", "walking_routes"]
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440003",
+      "agentId": "budget-agent-1",
+      "messageId": "msg-008",
+      "content": "For your group's activities tomorrow, here's the cost breakdown:\nLouvre tickets (group rate): €15/person\nBistrot Vivienne lunch: €25/person\nSeine Cruise (early bird): €12/person\nDinner estimate: €45/person\nTotal per person: €97\n\nTip: Book the Seine Cruise online for 20% discount.",
+      "timestamp": "2024-01-20T10:33:00.000Z",
+      "metadata": {
+        "type": "AI_RESPONSE",
+        "agent_type": "budget",
+        "confidence_score": 0.97,
+        "context": {
+          "tokens": ["budget", "costs", "group", "discount", "booking"],
+          "relevant_history": ["msg-008", "msg-009"],
+          "user_preferences": {
+            "budget_range": "moderate",
+            "value_preference": "quality_focused",
+            "booking_style": "advance"
+          }
+        },
+        "response_type": "analysis",
+        "specialties_used": ["cost_analysis", "deal_finding"],
+        "processing_time": 156,
+        "source_references": ["price_database", "discount_tracker"]
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440004",
+      "agentId": "local-agent-1",
+      "messageId": "msg-010",
+      "content": "Quick heads up: There's a transit strike tomorrow affecting Metro Line 1. For your Louvre visit, I recommend taking Bus 72 instead - it runs every 8 minutes and stops directly in front. The first bus is at 8:15 AM from your hotel's area.",
+      "timestamp": "2024-01-20T10:34:00.000Z",
+      "metadata": {
+        "type": "AI_RESPONSE",
+        "agent_type": "local",
+        "confidence_score": 0.94,
+        "context": {
+          "tokens": ["transport", "strike", "metro", "bus", "morning"],
+          "relevant_history": ["msg-010"],
+          "user_preferences": {
+            "transport_mode": "public_transit",
+            "location": "hotel_central",
+            "time_sensitivity": "high"
+          }
+        },
+        "response_type": "alert",
+        "specialties_used": ["local_updates", "transport_routing"],
+        "processing_time": 145,
+        "source_references": ["transit_alerts", "bus_schedules"]
+      }
+    }
+  ]
+}
