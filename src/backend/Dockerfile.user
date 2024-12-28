@@ -1,0 +1,91 @@
+# Stage 1: Builder
+FROM node:18-alpine AS builder
+
+# Create non-root user
+RUN addgroup -S nodeuser && \
+    adduser -S -G nodeuser nodeuser
+
+# Set working directory
+WORKDIR /build
+
+# Copy package files with correct permissions
+COPY --chown=nodeuser:nodeuser package*.json ./
+
+# Install dependencies including dev dependencies for build
+RUN npm ci
+
+# Copy source code with correct permissions
+COPY --chown=nodeuser:nodeuser . .
+
+# Build TypeScript code
+RUN npm run build && \
+    npm prune --production
+
+# Stage 2: Production
+FROM node:18-alpine
+
+# Create non-root user
+RUN addgroup -S nodeuser && \
+    adduser -S -G nodeuser nodeuser && \
+    mkdir -p /app && \
+    chown nodeuser:nodeuser /app
+
+# Set working directory
+WORKDIR /app
+
+# Copy built artifacts and dependencies from builder
+COPY --from=builder --chown=nodeuser:nodeuser /build/dist ./dist
+COPY --from=builder --chown=nodeuser:nodeuser /build/node_modules ./node_modules
+COPY --from=builder --chown=nodeuser:nodeuser /build/package.json ./
+
+# Set production environment variables
+ENV NODE_ENV=production \
+    PORT=3000 \
+    NODE_OPTIONS="--max-old-space-size=2048"
+
+# Switch to non-root user
+USER nodeuser
+
+# Configure security options
+RUN chmod -R 550 /app && \
+    chmod -R 500 /app/node_modules && \
+    chmod 550 /app/dist
+
+# Health check configuration
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/health || exit 1
+
+# Set resource limits
+ENV MEMORY_LIMIT="2048m" \
+    CPU_LIMIT="1000m"
+
+# Expose application port
+EXPOSE ${PORT}
+
+# Labels for container metadata
+LABEL maintainer="DevOps Team" \
+      application="user-service" \
+      version="${VERSION}" \
+      environment="production"
+
+# Start application
+CMD ["node", "dist/index.js"]
+
+# Security configurations
+SECURITY_OPT no-new-privileges:true
+RUN setcap 'cap_net_bind_service=+ep' /usr/local/bin/node
+
+# Read-only filesystem
+VOLUME ["/tmp", "/var/run"]
+READONLY true
+
+# Drop all capabilities except necessary ones
+DROP all
+ADD CAP_NET_BIND_SERVICE
+
+# Configure logging
+STOPSIGNAL SIGTERM
+LOGGING driver=json-file \
+        options="max-size=100m" \
+        options="max-file=3" \
+        options="compress=true"
