@@ -1,0 +1,62 @@
+# Use Python 3.11 slim as base image
+# python v3.11-slim
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Set environment variables
+ENV PYTHONPATH=/app \
+    PYTHONUNBUFFERED=1 \
+    # Prevent Python from writing pyc files
+    PYTHONDONTWRITEBYTECODE=1 \
+    # Prevent pip from caching
+    PIP_NO_CACHE_DIR=0
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
+RUN groupadd -r aiservice && \
+    useradd -r -g aiservice -s /bin/bash -d /home/aiservice aiservice && \
+    mkdir -p /home/aiservice && \
+    chown -R aiservice:aiservice /home/aiservice
+
+# Copy requirements file
+COPY requirements.txt .
+
+# Install Python packages
+# fastapi v0.104+
+# uvicorn v0.24+
+# pydantic v2.4+
+# langchain v0.0.335+
+# python-dotenv v1.0+
+RUN pip install --no-cache-dir -r requirements.txt && \
+    rm requirements.txt
+
+# Copy application code
+COPY --chown=aiservice:aiservice . .
+
+# Switch to non-root user
+USER aiservice
+
+# Health check configuration
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Expose port
+EXPOSE 8000
+
+# Set entrypoint
+ENTRYPOINT ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", \
+            "--workers", "4", "--proxy-headers", "--forwarded-allow-ips", "*"]
+
+# Build-time metadata
+LABEL maintainer="AI-Enhanced Group Chat Platform Team" \
+      version="1.0" \
+      description="AI Orchestrator service container" \
+      org.opencontainers.image.source="https://github.com/org/ai-chat-platform"
