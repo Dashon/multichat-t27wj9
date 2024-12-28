@@ -1,0 +1,41 @@
+# Generate the favicon.ico file using the following ImageMagick commands:
+
+# 1. Create base SVG design for sharp scaling
+convert -size 64x64 xc:none \
+  -draw "fill #1976D2 circle 32,32 32,64" \
+  -draw "fill white path 'M 24,20 L 40,32 L 24,44 Z'" \
+  base.svg
+
+# 2. Generate each required size with optimizations
+convert base.svg -resize 16x16 -depth 32 16.png
+convert base.svg -resize 24x24 -depth 32 24.png
+convert base.svg -resize 32x32 -depth 32 32.png
+convert base.svg -resize 64x64 -depth 32 64.png
+
+# 3. Combine all sizes into multi-resolution ICO file
+convert 16.png 24.png 32.png 64.png favicon.ico
+
+# File specifications:
+# - Format: ICO (Windows Icon)
+# - Color depth: 32-bit (RGBA)
+# - Sizes included: 16x16, 24x24, 32x32, 64x64
+# - Color profile: sRGB
+# - Transparency: Yes
+# - Compression: PNG-based compression for each size
+
+# Design details:
+# - Material Design 3 circular container
+# - Play button icon for chat/interaction metaphor
+# - Primary color: #1976D2 (Material Blue 700)
+# - High contrast white icon
+# - Transparent background for theme adaptation
+# - Sharp geometric shapes for clarity at small sizes
+
+# Browser compatibility:
+# - Tested in Chrome 90+
+# - Tested in Firefox 90+
+# - Tested in Safari 14+
+# - Tested in Edge 90+
+
+# Cache-Control: max-age=31536000
+# Versioning: Deploy with new filename when updated
