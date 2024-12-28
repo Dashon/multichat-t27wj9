@@ -1,0 +1,131 @@
+# Stage 1: Node.js Base
+FROM node:18-alpine AS node-base
+# Version: 18-alpine (LTS)
+LABEL maintainer="AI-Enhanced Group Chat Platform Team"
+LABEL description="Test environment for AI-Enhanced Group Chat Platform"
+LABEL version="1.0.0"
+
+# Install essential build dependencies
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    git \
+    curl
+
+# Install pnpm globally
+# Version: 8.0.0
+RUN npm install -g pnpm@8.0.0
+
+# Set working directory
+WORKDIR /app/test
+
+# Stage 2: Python Base
+FROM python:3.11-slim AS python-base
+# Version: 3.11-slim
+LABEL stage="python-test-base"
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create and activate virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Stage 3: Test Dependencies
+FROM node-base AS dependencies
+LABEL stage="test-dependencies"
+
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
+
+# Install Node.js dependencies with pnpm
+RUN pnpm install --frozen-lockfile
+
+# Copy Python requirements
+COPY requirements.txt ./
+RUN python3 -m pip install -r requirements.txt
+
+# Stage 4: Test Environment
+FROM node-base AS test-env
+LABEL stage="test-environment"
+
+# Set environment variables
+ENV NODE_ENV=test
+ENV PYTHON_VERSION=3.11
+ENV TEST_TIMEOUT=30000
+ENV MAX_MEMORY=4g
+ENV CPU_LIMIT=2
+
+# Copy dependencies from previous stage
+COPY --from=dependencies /app/test/node_modules ./node_modules
+COPY --from=python-base /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy test configuration and environment files
+COPY src/test/config ./config
+COPY src/test/.env.test ./.env.test
+
+# Copy test fixtures and utilities
+COPY src/test/fixtures ./fixtures
+COPY src/test/utils ./utils
+
+# Install test-specific tools
+RUN pnpm add -D \
+    jest@29.0.0 \
+    @types/jest@29.0.0 \
+    ts-jest@29.0.0 \
+    supertest@6.3.0 \
+    @testing-library/react@14.0.0 \
+    cypress@13.0.0
+
+# Security scanning tools
+RUN pnpm add -D \
+    snyk@1.1190.0 \
+    eslint-plugin-security@1.7.1
+
+# Performance testing tools
+RUN pnpm add -D \
+    artillery@2.0.0-27 \
+    autocannon@7.11.0
+
+# Copy test scripts
+COPY src/test/scripts ./scripts
+RUN chmod +x ./scripts/*.sh
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD node ./scripts/health-check.js
+
+# Set resource limits
+RUN echo "memory_limit = ${MAX_MEMORY}" >> /usr/local/etc/php/conf.d/docker-php-memlimit.ini
+
+# Expose test ports
+EXPOSE 3000-3004
+
+# Set default command to run tests
+CMD ["pnpm", "test"]
+
+# Stage 5: Security Scan
+FROM test-env AS security-scan
+LABEL stage="security-scan"
+
+# Run security scans
+RUN pnpm audit
+RUN snyk test || true
+
+# Stage 6: Final Test Image
+FROM test-env AS final
+LABEL stage="final"
+
+# Copy security scan results
+COPY --from=security-scan /app/test/security-report.json ./security-report.json
+
+# Set up test environment validation
+RUN node ./scripts/validate-env.js
+
+# Set up test runner with proper configurations
+ENTRYPOINT ["./scripts/test-runner.sh"]
