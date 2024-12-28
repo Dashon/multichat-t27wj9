@@ -1,0 +1,120 @@
+{
+  "expo": {
+    "name": "AI-Enhanced Group Chat",
+    "slug": "ai-enhanced-group-chat",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./src/assets/icons/app-icon.png",
+    "userInterfaceStyle": "automatic",
+    
+    "splash": {
+      "image": "./src/assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff",
+      "dark": {
+        "backgroundColor": "#121212"
+      }
+    },
+
+    "updates": {
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/your-project-id",
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD"
+    },
+
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.company.aigroupchat",
+      "buildNumber": "1.0.0",
+      "requireFullScreen": true,
+      "userInterfaceStyle": "automatic",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "remote-notification"
+        ],
+        "CFBundleAllowMixedLocalizations": true
+      }
+    },
+
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/icons/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF",
+        "monochromeImage": "./src/assets/icons/monochrome-icon.png"
+      },
+      "package": "com.company.aigroupchat",
+      "versionCode": 1,
+      "userInterfaceStyle": "automatic",
+      "allowBackup": true,
+      "softwareKeyboardLayoutMode": "pan"
+    },
+
+    "web": {
+      "favicon": "./src/assets/icons/favicon.png",
+      "name": "AI-Enhanced Group Chat",
+      "shortName": "AI Chat",
+      "lang": "en",
+      "themeColor": "#ffffff",
+      "backgroundColor": "#ffffff",
+      "display": "standalone",
+      "orientation": "portrait",
+      "crossorigin": "use-credentials",
+      "preferRelatedApplications": true,
+      "browserTarget": {
+        "chrome": ">=90",
+        "firefox": ">=90",
+        "safari": ">=14",
+        "edge": ">=90"
+      }
+    },
+
+    "plugins": [
+      "expo-localization",
+      "expo-secure-store",
+      "expo-notifications",
+      "expo-updates",
+      [
+        "expo-screen-orientation",
+        {
+          "initialOrientation": "PORTRAIT"
+        }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./src/assets/fonts/Roboto-Regular.ttf",
+            "./src/assets/fonts/Roboto-Medium.ttf",
+            "./src/assets/fonts/Roboto-Bold.ttf"
+          ]
+        }
+      ]
+    ],
+
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id"
+      },
+      "theme": {
+        "supportsMaterialYou": true,
+        "useDynamicColor": true,
+        "defaultTheme": "system"
+      },
+      "performance": {
+        "maxCacheSize": "100MB",
+        "imageCompressionQuality": 0.8,
+        "prefetchImages": true
+      },
+      "security": {
+        "allowScreenshots": true,
+        "requireAuthentication": true,
+        "minimumSupportedApiVersion": 1
+      }
+    }
+  }
+}
