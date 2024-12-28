@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+package ai.service.v1;
+
+import "google/protobuf/timestamp.proto"; // v3.0.0
+import "google/protobuf/empty.proto"; // v3.0.0
+
+option go_package = "./ai_service";
+option java_package = "com.chatapp.ai.service";
+
+// Core message structure for chat messages
+message ChatMessage {
+  string id = 1;
+  string content = 2;
+  string sender_id = 3;
+  string chat_id = 4;
+  google.protobuf.Timestamp timestamp = 5;
+  map<string, string> metadata = 6;
+}
+
+// Agent status enumeration
+enum AgentStatus {
+  AGENT_STATUS_UNSPECIFIED = 0;
+  AGENT_STATUS_AVAILABLE = 1;
+  AGENT_STATUS_BUSY = 2;
+  AGENT_STATUS_OFFLINE = 3;
+  AGENT_STATUS_ERROR = 4;
+}
+
+// Agent type enumeration
+enum AgentType {
+  AGENT_TYPE_UNSPECIFIED = 0;
+  EXPLORER = 1;  // Travel & activities expert
+  FOODIE = 2;    // Restaurant & dining expert
+  PLANNER = 3;   // Itinerary organization expert
+  BUDGET = 4;    // Financial planning expert
+  LOCAL = 5;     // Local knowledge expert
+}
+
+// Core agent structure
+message Agent {
+  string id = 1;
+  string name = 2;
+  AgentType type = 3;
+  repeated string capabilities = 4;
+  AgentStatus status = 5;
+  map<string, string> metadata = 6;
+}
+
+// Context information for AI processing
+message Context {
+  string chat_id = 1;
+  repeated ChatMessage recent_messages = 2;
+  map<string, string> user_preferences = 3;
+  map<string, string> session_data = 4;
+}
+
+// Request to process a message with AI
+message ProcessMessageRequest {
+  ChatMessage message = 1;
+  string agent_id = 2;
+  Context context = 3;
+}
+
+// Response from AI message processing
+message ProcessMessageResponse {
+  ChatMessage response = 1;
+  string agent_id = 2;
+  float confidence = 3;
+  repeated string suggested_actions = 4;
+}
+
+// Request to list available agents
+message GetAgentsRequest {
+  repeated AgentType filter_types = 1;
+  AgentStatus filter_status = 2;
+}
+
+// Response with available agents
+message GetAgentsResponse {
+  repeated Agent agents = 1;
+}
+
+// Request to update agent context
+message UpdateContextRequest {
+  string agent_id = 1;
+  Context context = 2;
+}
+
+// Response for context update
+message UpdateContextResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// AI Service definition
+service AIService {
+  // Process a message with appropriate AI agent
+  rpc ProcessMessage(ProcessMessageRequest) returns (ProcessMessageResponse) {}
+  
+  // List available AI agents and their capabilities
+  rpc GetAvailableAgents(GetAgentsRequest) returns (GetAgentsResponse) {}
+  
+  // Update the context for an AI agent
+  rpc UpdateAgentContext(UpdateContextRequest) returns (UpdateContextResponse) {}
+  
+  // Stream real-time agent status updates
+  rpc StreamAgentStatus(google.protobuf.Empty) returns (stream Agent) {}
+  
+  // Batch process multiple messages
+  rpc BatchProcessMessages(stream ProcessMessageRequest) returns (stream ProcessMessageResponse) {}
+}
