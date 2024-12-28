@@ -1,0 +1,218 @@
+# Artillery Load Testing Configuration v1.0.0
+# Enhanced configuration for AI-Enhanced Group Chat Platform API endpoints
+# Includes comprehensive scenarios for message service, AI agent interactions, and user service testing
+
+config:
+  target: "{{ $processEnvironment.TARGET_URL || 'http://localhost:3000' }}"
+  phases:
+    # Warm-up phase with gradual load
+    - name: "warmup"
+      duration: 60
+      arrivalRate: 5
+      rampTo: 10
+      name: "Initial system warm-up"
+
+    # Ramp up phase to test scalability
+    - name: "ramp_up"
+      duration: 120
+      arrivalRate: 10
+      rampTo: 50
+      name: "Load ramp-up phase"
+
+    # Peak load testing phase
+    - name: "peak_load"
+      duration: 300
+      arrivalRate: 50
+      name: "Sustained peak load"
+
+    # Spike test to validate system resilience
+    - name: "spike_test"
+      duration: 60
+      arrivalRate: 100
+      name: "High-intensity spike"
+
+    # Cool down phase
+    - name: "ramp_down"
+      duration: 120
+      arrivalRate: 50
+      rampTo: 5
+      name: "Controlled ramp-down"
+
+  # WebSocket configuration
+  ws:
+    # Reuse HTTP cookies in WebSocket connections
+    reuseCookies: true
+    # Keep connections alive
+    keepalive: true
+    # Subprotocols for WebSocket
+    subprotocols: ["chat.v1"]
+
+  # Default headers for all requests
+  defaults:
+    headers:
+      Content-Type: "application/json"
+      Accept: "application/json"
+      User-Agent: "Artillery-Test/1.0"
+
+  # Plugins for enhanced functionality
+  plugins:
+    metrics-by-endpoint: {}
+    expect: {}
+    statsd:
+      host: "localhost"
+      prefix: "artillery"
+
+  # Variable processors
+  processor: "./processors.js"
+
+scenarios:
+  # Message Service Testing Scenario
+  - name: "message_service_endpoints"
+    weight: 40
+    flow:
+      # User authentication
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "{{ $processEnvironment.TEST_USER_EMAIL }}"
+            password: "{{ $processEnvironment.TEST_USER_PASSWORD }}"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+          expect:
+            - statusCode: 200
+            - hasProperty: "token"
+
+      # WebSocket connection
+      - ws:
+          url: "/ws/chat"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          onOpen:
+            - emit:
+                channel: "join"
+                data: { chatId: "{{ $uuid }}" }
+
+      # Send individual messages
+      - loop:
+          - post:
+              url: "/api/v1/messages"
+              headers:
+                Authorization: "Bearer {{ authToken }}"
+              json:
+                chatId: "{{ $uuid }}"
+                content: "Test message {{ $randomString(20) }}"
+                type: "text"
+              expect:
+                - statusCode: 201
+                - hasProperty: "messageId"
+        count: 5
+
+      # Create message thread
+      - post:
+          url: "/api/v1/threads"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          json:
+            parentMessageId: "{{ messageId }}"
+            content: "Thread reply {{ $randomString(10) }}"
+          expect:
+            - statusCode: 201
+
+  # AI Service Testing Scenario
+  - name: "ai_service_endpoints"
+    weight: 30
+    flow:
+      # AI agent interaction
+      - post:
+          url: "/api/v1/ai/process"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          json:
+            agentType: "explorer"
+            query: "Recommend attractions near {{ $randomItem(['Paris', 'London', 'New York']) }}"
+            context: { location: "city_center" }
+          expect:
+            - statusCode: 200
+            - hasProperty: "recommendations"
+            - responseTime: 5000
+
+      # Context management
+      - post:
+          url: "/api/v1/context"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          json:
+            sessionId: "{{ $uuid }}"
+            contextData: { 
+              preferences: ["restaurants", "museums"],
+              lastQuery: "tourist attractions"
+            }
+          expect:
+            - statusCode: 200
+
+  # User Service Testing Scenario
+  - name: "user_service_endpoints"
+    weight: 30
+    flow:
+      # User registration
+      - post:
+          url: "/api/v1/users"
+          json:
+            username: "test_user_{{ $randomString(8) }}"
+            email: "test_{{ $randomString(8) }}@example.com"
+            password: "Test123!{{ $randomString(8) }}"
+          expect:
+            - statusCode: 201
+            - hasProperty: "userId"
+
+      # Update user preferences
+      - put:
+          url: "/api/v1/preferences"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          json:
+            aiAgents: ["explorer", "foodie"]
+            notifications: { enabled: true, types: ["mentions", "replies"] }
+          expect:
+            - statusCode: 200
+
+# Custom metrics collection
+metrics:
+  # Response time metrics
+  - name: "response_time"
+    type: "histogram"
+    endpoints:
+      - "/api/v1/messages"
+      - "/api/v1/ai/process"
+      - "/ws/chat"
+    thresholds:
+      p95: 2000
+      p99: 5000
+      median: 1000
+
+  # Error rate tracking
+  - name: "error_rate"
+    type: "counter"
+    threshold: 0.01
+    categories:
+      - "network_errors"
+      - "authentication_errors"
+      - "validation_errors"
+      - "timeout_errors"
+
+  # WebSocket metrics
+  - name: "websocket_metrics"
+    type: "custom"
+    measurements:
+      - "connection_stability"
+      - "message_delivery_time"
+      - "concurrent_connections"
+
+  # AI performance metrics
+  - name: "ai_performance"
+    type: "histogram"
+    measurements:
+      - "agent_response_time"
+      - "context_processing_time"
+      - "recommendation_generation_time"
