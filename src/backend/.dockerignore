@@ -1,0 +1,59 @@
+# Version Control
+**/.git
+**/.gitignore
+
+# Dependencies
+**/node_modules
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/dist
+
+# Testing and Coverage
+**/coverage
+**/tests
+**/.nyc_output
+
+# Environment and Configuration
+**/.env*
+**/config/*.env
+
+# IDE and Editor
+**/.vscode
+**/.idea
+
+# Documentation
+**/README.md
+**/CHANGELOG.md
+
+# Docker Files
+**/docker-compose*.yml
+**/Dockerfile*
+
+# AI Service Optimization
+**/models/cache/**
+**/checkpoints/**
+
+# Logs and Temporary Files
+**/logs
+**/*.log
+**/tmp
+**/*.tmp
+
+# Build and Dependency Files
+**/requirements.txt
+**/package*.json
+
+# Source Maps and Type Definitions
+**/*.d.ts
+**/*.map
+
+# Development Artifacts
+**/coverage
+**/.nyc_output
+**/dist
+
+# Misc
+**/.DS_Store
+**/Thumbs.db
