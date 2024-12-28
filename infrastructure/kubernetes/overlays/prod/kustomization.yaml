@@ -1,0 +1,169 @@
+# Production environment Kustomize configuration
+# Version: v5.0.0
+# Purpose: Customizes base Kubernetes resources for production deployment with high availability and monitoring
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Base resources to be customized
+resources:
+- ../../base/ai-service.yaml
+- ../../base/api-gateway.yaml
+- ../../base/message-service.yaml
+- ../../base/monitoring.yaml
+- pod-disruption-budget.yaml
+- horizontal-pod-autoscaler.yaml
+
+# Target namespace for all resources
+namespace: prod
+
+# Common labels for all resources
+commonLabels:
+  environment: production
+  managed-by: kustomize
+  region: multi-region
+  tier: production
+
+# Production-specific patches
+patches:
+# AI Service production configuration
+- target:
+    kind: Deployment
+    name: ai-service
+  patch:
+    spec:
+      replicas: 8
+      template:
+        spec:
+          containers:
+          - name: ai-service
+            resources:
+              requests:
+                cpu: "2"
+                memory: 4Gi
+                nvidia.com/gpu: "1"
+              limits:
+                cpu: "4"
+                memory: 8Gi
+                nvidia.com/gpu: "1"
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  topologyKey: kubernetes.io/hostname
+
+# API Gateway production configuration
+- target:
+    kind: Deployment
+    name: api-gateway
+  patch:
+    spec:
+      replicas: 10
+      template:
+        spec:
+          containers:
+          - name: api-gateway
+            resources:
+              requests:
+                cpu: "1"
+                memory: 2Gi
+              limits:
+                cpu: "2"
+                memory: 4Gi
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  topologyKey: kubernetes.io/hostname
+
+# Message Service production configuration
+- target:
+    kind: Deployment
+    name: message-service
+  patch:
+    spec:
+      replicas: 15
+      template:
+        spec:
+          containers:
+          - name: message-service
+            resources:
+              requests:
+                cpu: "1"
+                memory: 2Gi
+              limits:
+                cpu: "2"
+                memory: 4Gi
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  topologyKey: kubernetes.io/hostname
+
+# Generate production ConfigMap
+configMapGenerator:
+- name: prod-config
+  literals:
+  - ENVIRONMENT=production
+  - LOG_LEVEL=info
+  - ENABLE_MONITORING=true
+  - TRACING_ENABLED=true
+  - ALERT_THRESHOLD_CPU=80
+  - ALERT_THRESHOLD_MEMORY=85
+  - ENABLE_GPU_METRICS=true
+
+# Replica configuration for services
+replicas:
+- name: ai-service
+  count: 8
+- name: api-gateway
+  count: 10
+- name: message-service
+  count: 15
+
+# Resource quotas for production namespace
+- target:
+    kind: ResourceQuota
+    name: prod-quota
+  patch:
+    spec:
+      hard:
+        cpu: "100"
+        memory: 200Gi
+        nvidia.com/gpu: "10"
+        pods: "100"
+
+# Network policies for production security
+- target:
+    kind: NetworkPolicy
+    name: default-network-policy
+  patch:
+    spec:
+      podSelector: {}
+      policyTypes:
+      - Ingress
+      - Egress
+      ingress:
+      - from:
+        - namespaceSelector:
+            matchLabels:
+              environment: production
+
+# Production monitoring configuration
+- target:
+    kind: ConfigMap
+    name: monitoring-config
+  patch:
+    data:
+      prometheus.yml: |
+        global:
+          scrape_interval: 15s
+          evaluation_interval: 15s
+        alerting:
+          alertmanagers:
+          - static_configs:
+            - targets:
+              - alertmanager:9093
