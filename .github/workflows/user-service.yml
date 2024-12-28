@@ -1,0 +1,214 @@
+name: User Service CI/CD
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/backend/user-service/**'
+      - 'src/backend/Dockerfile.user'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/backend/user-service/**'
+      - 'src/backend/Dockerfile.user'
+
+# Limit concurrent deployments
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Required permissions
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  security-events: write
+
+env:
+  NODE_VERSION: '18.x'
+  DOCKER_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY }}
+  IMAGE_NAME: user-service
+  DOCKER_BUILDKIT: '1'
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'src/backend/user-service/package-lock.json'
+
+      - name: Install Dependencies
+        working-directory: src/backend/user-service
+        run: |
+          npm ci
+          npm audit
+
+      - name: Code Quality Check
+        working-directory: src/backend/user-service
+        run: npm run lint
+
+      - name: Run Security Scan
+        uses: snyk/actions/node@v3
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+
+      - name: Run Unit Tests
+        working-directory: src/backend/user-service
+        run: npm run test:ci
+        env:
+          NODE_ENV: test
+
+      - name: Run Integration Tests
+        working-directory: src/backend/user-service
+        run: npm run test:integration
+        env:
+          NODE_ENV: test
+
+      - name: Build TypeScript
+        working-directory: src/backend/user-service
+        run: npm run build
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: src/backend/user-service/coverage
+          retention-days: 7
+
+  build-and-push-image:
+    name: Build and Push Docker Image
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          buildkitd-flags: --debug
+
+      - name: Login to Amazon ECR
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+
+      - name: Generate Image Tags
+        id: tags
+        run: |
+          echo "::set-output name=tags::${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }},${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+
+      - name: Build and Push Image
+        uses: docker/build-push-action@v3
+        with:
+          context: src/backend
+          file: src/backend/Dockerfile.user
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_ENV=production
+            VERSION=${{ github.sha }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.created=${{ github.event.repository.updated_at }}
+
+  deploy:
+    name: Deploy to Kubernetes
+    needs: build-and-push-image
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: production
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update Kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Deploy to Kubernetes
+        run: |
+          # Update image tag in deployment
+          kubectl set image deployment/user-service \
+            user-service=${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            -n default
+
+          # Wait for rollout to complete
+          kubectl rollout status deployment/user-service -n default --timeout=300s
+
+      - name: Verify Deployment
+        run: |
+          # Check deployment status
+          kubectl get deployment user-service -n default -o wide
+          
+          # Verify pods are running
+          kubectl get pods -l app=user-service -n default
+
+      - name: Run Health Check
+        run: |
+          # Wait for service to be ready
+          sleep 30
+          
+          # Get service endpoint
+          SERVICE_IP=$(kubectl get svc user-service -n default -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          
+          # Check health endpoint
+          curl -f http://${SERVICE_IP}:3000/health || exit 1
+
+      - name: Update Deployment Status
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const deployment = await github.rest.repos.createDeployment({
+              owner,
+              repo,
+              ref: context.sha,
+              environment: 'production',
+              auto_merge: false
+            });
+            
+            await github.rest.repos.createDeploymentStatus({
+              owner,
+              repo,
+              deployment_id: deployment.data.id,
+              state: '${{ job.status }}',
+              environment_url: 'https://api.chat-platform.com',
+              log_url: `https://github.com/${owner}/${repo}/actions/runs/${context.runId}`
+            });
