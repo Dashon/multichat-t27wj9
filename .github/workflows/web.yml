@@ -1,0 +1,133 @@
+name: Web CI/CD
+
+# Trigger workflow on push and pull requests to main, staging, and dev branches
+# Only when changes are made to src/web directory
+on:
+  push:
+    branches: [main, staging, dev]
+    paths:
+      - 'src/web/**'
+  pull_request:
+    branches: [main, staging, dev]
+    paths:
+      - 'src/web/**'
+
+# Environment variables used across jobs
+env:
+  NODE_VERSION: '18'
+  NODE_ENV: production
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: './src/web/package-lock.json'
+
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./src/web/node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('./src/web/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install Dependencies
+        working-directory: ./src/web
+        run: npm ci
+        timeout-minutes: 10
+
+      - name: Type Check
+        working-directory: ./src/web
+        run: npm run typecheck
+        timeout-minutes: 5
+
+      - name: Lint
+        working-directory: ./src/web
+        run: npm run lint
+        timeout-minutes: 5
+
+      - name: Run Tests
+        working-directory: ./src/web
+        run: npm test -- --coverage --ci --maxWorkers=2
+        timeout-minutes: 10
+        env:
+          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
+
+      - name: Build Application
+        working-directory: ./src/web
+        run: npm run build
+        timeout-minutes: 10
+        env:
+          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: ./src/web/build
+          retention-days: 1
+
+  deploy:
+    name: Deploy
+    needs: build-and-test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    
+    # Set environment based on branch
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || github.ref == 'refs/heads/staging' && 'staging' || 'development' }}
+      url: ${{ steps.deployment.outputs.url }}
+
+    steps:
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: build
+          path: ./src/web/build
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy to S3
+        working-directory: ./src/web
+        run: |
+          aws s3 sync build/ s3://${{ secrets.S3_BUCKET }} \
+            --delete \
+            --cache-control "public, max-age=31536000, immutable"
+        timeout-minutes: 5
+
+      - name: Invalidate CloudFront Cache
+        working-directory: ./src/web
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"
+        timeout-minutes: 5
+
+      - name: Set Deployment URL
+        id: deployment
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "url=https://app.example.com" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref }}" = "refs/heads/staging" ]; then
+            echo "url=https://staging.app.example.com" >> $GITHUB_OUTPUT
+          else
+            echo "url=https://dev.app.example.com" >> $GITHUB_OUTPUT
+          fi
