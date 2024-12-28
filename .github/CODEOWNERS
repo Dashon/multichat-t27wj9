@@ -1,0 +1,58 @@
+* @project-leads
+
+# AI service and ML components ownership with security oversight
+/src/backend/ai-service/** @ai-team-leads @ml-engineers @security-team
+
+# API Gateway service ownership with security review
+/src/backend/api-gateway/** @backend-leads @api-team @security-team
+
+# Message service ownership
+/src/backend/message-service/** @backend-leads @messaging-team
+
+# Preference engine ownership
+/src/backend/preference-engine/** @ai-team-leads @preference-team
+
+# User service and authentication ownership with security review
+/src/backend/user-service/** @backend-leads @auth-team @security-team
+
+# Web application ownership
+/src/web/** @frontend-leads @web-team
+
+# Test suite ownership
+/src/test/** @qa-leads @test-engineers
+
+# Infrastructure and deployment ownership with security review
+infrastructure/** @devops-leads @platform-engineers @security-team
+
+# CI/CD workflow ownership
+.github/workflows/** @devops-leads @ci-team
+
+# Protocol buffer definitions ownership
+**/*.proto @backend-leads @api-team
+
+# Security-related code ownership
+**/security/** @security-team @project-leads
+
+# Monitoring and observability ownership
+**/monitoring/** @devops-leads @sre-team
+
+# Authentication code ownership with mandatory security review
+**/auth/** @security-team @auth-team @backend-leads
+
+# Cryptography code ownership
+**/encryption/** @security-team @crypto-specialists
+
+# Compliance-related code ownership
+**/compliance/** @security-team @compliance-team
+
+# Documentation ownership
+**/docs/** @tech-writers @project-leads
+
+# Database schema and migration ownership
+**/database/** @db-team @backend-leads
+
+# Configuration file ownership
+**/config/** @devops-leads @platform-engineers
+
+# Package dependencies ownership with security review
+package.json @project-leads @security-team
