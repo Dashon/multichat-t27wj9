@@ -1,0 +1,103 @@
+# Prometheus Configuration v2.45.0
+# Enterprise-grade monitoring configuration for AI-Enhanced Group Chat Platform
+
+global:
+  # Standard metrics collection interval
+  scrape_interval: 15s
+  # Alert rule evaluation frequency
+  evaluation_interval: 30s
+  # Maximum time for scrape requests
+  scrape_timeout: 10s
+  # Environment identification labels
+  external_labels:
+    environment: production
+    region: us-west-2
+    cluster: primary
+
+# Alert and recording rule configurations
+rule_files:
+  - "rules/alerts.yml"     # Service, AI, and security alerts
+  - "rules/recording.yml"  # Performance and resource metrics
+  - "rules/security.yml"   # Security-specific rules
+
+# Scraping configurations for different components
+scrape_configs:
+  # Kubernetes pod discovery and metrics collection
+  - job_name: kubernetes-pods
+    honor_labels: true
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names: 
+            - default
+            - monitoring
+            - app
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        action: keep
+        regex: up|.*_requests_total|.*_errors_total|.*_duration_seconds
+
+  # Enhanced security metrics collection
+  - job_name: security-metrics
+    metrics_path: /security/metrics
+    scheme: https
+    tls_config:
+      cert_file: /etc/prometheus/certs/client.crt
+      key_file: /etc/prometheus/certs/client.key
+      ca_file: /etc/prometheus/certs/ca.crt
+    static_configs:
+      - targets:
+        - auth-service:9090
+        - api-gateway:9090
+        labels:
+          service_type: security_critical
+    scrape_interval: 10s  # More frequent for security metrics
+    scrape_timeout: 5s
+
+  # AI service monitoring
+  - job_name: ai-service
+    metrics_path: /metrics
+    honor_timestamps: true
+    static_configs:
+      - targets:
+        - ai-service:9090
+        labels:
+          service_type: ai_processing
+    scrape_interval: 10s
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        action: keep
+        regex: ai_.*
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - scheme: https
+      path_prefix: /
+      timeout: 5s
+      api_version: v2
+      static_configs:
+        - targets:
+          - alertmanager:9093
+          - alertmanager-backup:9093
+
+# Long-term storage configuration with Thanos
+remote_write:
+  - url: http://thanos-receive:19291/api/v1/receive
+    remote_timeout: 30s
+    queue_config:
+      capacity: 10000
+      max_samples_per_send: 5000
+      batch_send_deadline: 5s
+    write_relabel_configs:
+      - source_labels: [__name__]
+        regex: temp.*
+        action: drop
