@@ -1,0 +1,58 @@
+# EditorConfig is awesome: https://EditorConfig.org
+# Root EditorConfig file for AI-Enhanced Group Chat Platform
+root = true
+
+# Default settings for all files
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+max_line_length = 100
+
+# TypeScript and React TypeScript files
+[*.{ts,tsx}]
+indent_size = 2
+quote_type = single
+curly_bracket_next_line = false
+spaces_around_operators = true
+space_after_function_keyword = true
+
+# Python files
+[*.py]
+indent_size = 4
+max_line_length = 88
+quote_type = double
+spaces_around_operators = true
+spaces_around_brackets = false
+
+# JSON files
+[*.json]
+indent_size = 2
+insert_final_newline = false
+quote_type = double
+
+# YAML files
+[*.{yml,yaml}]
+indent_size = 2
+quote_type = single
+allow_duplicate_keys = false
+
+# Markdown files
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = 80
+insert_final_newline = true
+
+# Dockerfile
+[*Dockerfile*]
+indent_size = 4
+insert_final_newline = true
+
+# Shell scripts
+[*.sh]
+indent_size = 2
+switch_case_indent = true
+insert_final_newline = true
