@@ -1,0 +1,209 @@
+{
+  "chatGroups": [
+    {
+      "id": "chat-group-1",
+      "name": "Paris Trip Planning",
+      "type": "GROUP",
+      "status": "ACTIVE",
+      "participants": [
+        {
+          "userId": "user-1",
+          "role": "owner",
+          "joinedAt": "2023-11-01T10:00:00Z",
+          "preferences": {
+            "aiInteractionLevel": "high",
+            "preferredAgents": ["explorer", "foodie", "planner"]
+          }
+        },
+        {
+          "userId": "user-2",
+          "role": "member",
+          "joinedAt": "2023-11-01T10:05:00Z",
+          "preferences": {
+            "aiInteractionLevel": "medium",
+            "preferredAgents": ["foodie", "budget"]
+          }
+        },
+        {
+          "userId": "user-3",
+          "role": "member",
+          "joinedAt": "2023-11-01T10:10:00Z",
+          "preferences": {
+            "aiInteractionLevel": "high",
+            "preferredAgents": ["local", "explorer"]
+          }
+        }
+      ],
+      "agents": [
+        {
+          "id": "agent-explorer-1",
+          "name": "@explorer",
+          "type": "explorer",
+          "status": "active",
+          "specialization": {
+            "primary": "Travel & Activities",
+            "secondary": ["Local Events", "Transportation"],
+            "contextAwareness": "high"
+          },
+          "contextTracking": {
+            "shortTermMemory": {
+              "currentLocation": "Paris",
+              "activeTopics": ["Louvre Visit", "Metro Routes"]
+            },
+            "longTermMemory": {
+              "preferences": ["Art Museums", "Walking Tours"],
+              "constraints": ["Budget-friendly", "Time-efficient"]
+            },
+            "interactionHistory": [
+              {
+                "timestamp": "2023-11-01T11:00:00Z",
+                "type": "recommendation",
+                "topic": "Louvre Tour Planning"
+              }
+            ]
+          }
+        },
+        {
+          "id": "agent-foodie-1",
+          "name": "@foodie",
+          "type": "foodie",
+          "status": "active",
+          "specialization": {
+            "primary": "Restaurants & Dining",
+            "secondary": ["Dietary Preferences", "Local Cuisine"],
+            "contextAwareness": "high"
+          },
+          "contextTracking": {
+            "shortTermMemory": {
+              "currentArea": "Louvre District",
+              "mealType": "Lunch"
+            },
+            "longTermMemory": {
+              "preferences": ["French Cuisine", "Vegetarian Options"],
+              "priceRange": "moderate"
+            },
+            "interactionHistory": [
+              {
+                "timestamp": "2023-11-01T11:30:00Z",
+                "type": "suggestion",
+                "topic": "Restaurant Recommendations"
+              }
+            ]
+          }
+        }
+      ],
+      "settings": {
+        "notifications": true,
+        "aiAssistanceEnabled": true,
+        "threadingEnabled": true,
+        "contextPersistence": true,
+        "agentCollaboration": true,
+        "proactiveAssistance": true
+      },
+      "contextData": {
+        "groupPurpose": "Planning a group trip to Paris",
+        "activeTopics": [
+          "Itinerary Planning",
+          "Restaurant Selection",
+          "Museum Visits"
+        ],
+        "recentDecisions": [
+          {
+            "topic": "Louvre Visit",
+            "status": "decided",
+            "outcome": "Visit scheduled for tomorrow morning",
+            "timestamp": "2023-11-01T12:00:00Z"
+          }
+        ],
+        "aiInteractions": [
+          {
+            "agentId": "agent-explorer-1",
+            "type": "recommendation",
+            "context": "Museum tour planning",
+            "timestamp": "2023-11-01T11:00:00Z"
+          }
+        ],
+        "groupDynamics": {
+          "participationLevel": "high",
+          "decisionMakingStyle": "collaborative",
+          "interactionPattern": "frequent"
+        }
+      },
+      "createdAt": "2023-11-01T10:00:00Z",
+      "updatedAt": "2023-11-01T12:00:00Z",
+      "version": 1
+    },
+    {
+      "id": "chat-group-2",
+      "name": "Direct Chat",
+      "type": "DIRECT",
+      "status": "ACTIVE",
+      "participants": [
+        {
+          "userId": "user-1",
+          "role": "member",
+          "joinedAt": "2023-11-01T09:00:00Z",
+          "preferences": {
+            "aiInteractionLevel": "medium",
+            "preferredAgents": ["planner"]
+          }
+        },
+        {
+          "userId": "user-2",
+          "role": "member",
+          "joinedAt": "2023-11-01T09:00:00Z",
+          "preferences": {
+            "aiInteractionLevel": "low",
+            "preferredAgents": ["local"]
+          }
+        }
+      ],
+      "agents": [
+        {
+          "id": "agent-planner-1",
+          "name": "@planner",
+          "type": "planner",
+          "status": "active",
+          "specialization": {
+            "primary": "Itinerary Organization",
+            "secondary": ["Time Management", "Group Coordination"],
+            "contextAwareness": "medium"
+          },
+          "contextTracking": {
+            "shortTermMemory": {
+              "currentTask": "Schedule Coordination",
+              "timeframe": "Next Week"
+            },
+            "longTermMemory": {
+              "preferences": ["Morning Activities", "Flexible Planning"],
+              "patterns": ["Regular Check-ins"]
+            },
+            "interactionHistory": []
+          }
+        }
+      ],
+      "settings": {
+        "notifications": true,
+        "aiAssistanceEnabled": true,
+        "threadingEnabled": false,
+        "contextPersistence": true,
+        "agentCollaboration": false,
+        "proactiveAssistance": false
+      },
+      "contextData": {
+        "groupPurpose": "Personal chat with AI assistance",
+        "activeTopics": ["Schedule Planning"],
+        "recentDecisions": [],
+        "aiInteractions": [],
+        "groupDynamics": {
+          "participationLevel": "medium",
+          "decisionMakingStyle": "casual",
+          "interactionPattern": "regular"
+        }
+      },
+      "createdAt": "2023-11-01T09:00:00Z",
+      "updatedAt": "2023-11-01T09:30:00Z",
+      "version": 1
+    }
+  ]
+}
