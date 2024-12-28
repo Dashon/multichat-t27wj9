@@ -1,0 +1,34 @@
+# AI-Enhanced Group Chat Platform - Crawler Access Control
+# Last updated: 2024
+# Contact: webmaster@platform.com
+
+# Global rules for all crawlers
+User-agent: *
+
+# Protect sensitive application routes
+Disallow: /api/
+Disallow: /chat/
+Disallow: /user/
+Disallow: /settings/
+Disallow: /auth/
+Disallow: /ai/
+
+# Allow public content routes
+Allow: /
+Allow: /about
+Allow: /help
+Allow: /blog
+Allow: /sitemap.xml
+
+# Rate limiting - delay between requests
+Crawl-delay: 10
+
+# Sitemap location
+Sitemap: https://platform.com/sitemap.xml
+
+# Additional security notes:
+# - All API endpoints are protected
+# - Private user data routes are blocked
+# - Chat messages are not indexable
+# - AI interaction endpoints are secured
+# - Only public informational pages are crawlable
