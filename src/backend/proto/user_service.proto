@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package user;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = "./proto/user";
+
+// UserRole defines the hierarchical access control levels
+enum UserRole {
+  USER = 0;          // Basic user with access to own chats only
+  PREMIUM_USER = 1;  // Premium user with access to all public chats
+  MODERATOR = 2;     // Moderator with content moderation capabilities
+  ADMIN = 3;         // Administrator with full system access
+}
+
+// NotificationSettings defines user notification preferences
+message NotificationSettings {
+  bool email_enabled = 1;    // Enable/disable email notifications
+  bool push_enabled = 2;     // Enable/disable push notifications
+  bool mention_alerts = 3;   // Enable/disable @mention alerts
+  bool group_updates = 4;    // Enable/disable group activity updates
+}
+
+// UserSettings defines user preferences and configuration
+message UserSettings {
+  string theme = 1;                           // UI theme preference
+  NotificationSettings notifications = 2;      // Notification configuration
+  string language = 3;                        // Preferred language
+  string timezone = 4;                        // User timezone
+}
+
+// User represents the core user data model
+message User {
+  string id = 1;                                    // Unique user identifier
+  string email = 2;                                 // User email address
+  string username = 3;                              // Display username
+  UserRole role = 4;                                // User access role
+  UserSettings settings = 5;                        // User preferences
+  google.protobuf.Timestamp created_at = 6;         // Account creation timestamp
+  google.protobuf.Timestamp last_active = 7;        // Last activity timestamp
+}
+
+// CreateUserRequest defines the user creation payload
+message CreateUserRequest {
+  string email = 1;                    // Required email address
+  string username = 2;                 // Required username
+  string password = 3;                 // Required password (hashed client-side)
+  UserSettings settings = 4;           // Optional initial settings
+}
+
+// UpdateUserRequest defines the user update payload
+message UpdateUserRequest {
+  string id = 1;                       // User ID to update
+  string username = 2;                 // Optional new username
+  UserSettings settings = 3;           // Optional new settings
+  UserRole role = 4;                   // Optional new role (admin only)
+}
+
+// LoginRequest defines the authentication payload
+message LoginRequest {
+  string email = 1;                    // User email
+  string password = 2;                 // Password (hashed client-side)
+  string device_id = 3;                // Unique device identifier
+}
+
+// AuthResponse defines the authentication response
+message AuthResponse {
+  string access_token = 1;             // JWT access token
+  string refresh_token = 2;            // JWT refresh token
+  int32 expires_in = 3;                // Token expiration in seconds
+  string token_type = 4;               // Token type (e.g., "Bearer")
+}
+
+// RefreshTokenRequest defines the token refresh payload
+message RefreshTokenRequest {
+  string refresh_token = 1;            // Current refresh token
+  string device_id = 2;                // Device identifier for validation
+}
+
+// UserService defines the user management gRPC service interface
+service UserService {
+  // CreateUser creates a new user account
+  rpc CreateUser(CreateUserRequest) returns (User) {}
+
+  // GetUser retrieves user details by ID
+  rpc GetUser(string) returns (User) {}
+
+  // UpdateUser updates user information
+  rpc UpdateUser(UpdateUserRequest) returns (User) {}
+
+  // DeleteUser removes a user account
+  rpc DeleteUser(string) returns (google.protobuf.Empty) {}
+
+  // Login authenticates a user and returns tokens
+  rpc Login(LoginRequest) returns (AuthResponse) {}
+
+  // RefreshToken refreshes an expired access token
+  rpc RefreshToken(RefreshTokenRequest) returns (AuthResponse) {}
+}
