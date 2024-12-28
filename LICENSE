@@ -1,0 +1,69 @@
+MIT License
+
+Copyright (c) 2023 AI-Enhanced Group Chat Platform Contributors
+
+Permission is hereby granted, free of charge, to any person or entity obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+1. The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software, including but not limited to:
+   - Source code distributions
+   - Binary distributions
+   - User interface displays
+   - Documentation
+   - API documentation
+   - Cloud deployments
+
+2. Attribution Requirements:
+   - All modifications must clearly indicate changes made from the original Software
+   - User interfaces must display appropriate attribution in a visible manner
+   - API usage must include attribution in documentation and responses
+   - Cloud deployments must maintain attribution in service documentation
+
+3. Enterprise Integration:
+   - Commercial and enterprise use is explicitly permitted
+   - Additional enterprise terms may be provided in separate agreements
+   - Enterprise users must maintain compliance with attribution requirements
+   - Integration with proprietary systems is permitted while maintaining this license
+
+4. Contributor Agreements:
+   - All contributions to the Software are subject to the same terms
+   - Contributors must sign appropriate Contributor License Agreements
+   - Contributions must not violate any third-party intellectual property rights
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+Additional Terms:
+
+1. Trademark and Patent Notice:
+   - This license does not grant trademark rights to the names of contributors
+   - No patent license is granted by virtue of this license
+   - Any patent rights must be expressly granted in a separate agreement
+
+2. Compliance and Monitoring:
+   - Users must participate in automated compliance checking
+   - Annual legal reviews may be required for enterprise deployments
+   - Violations must be remedied within 30 days of notification
+
+3. Dispute Resolution:
+   - Disputes shall be resolved through arbitration
+   - United States law shall govern all interpretations
+   - International users agree to jurisdiction for dispute resolution
+
+4. Termination:
+   - License terminates automatically upon material breach
+   - 30-day cure period provided for inadvertent violations
+   - Termination does not affect properly granted sublicenses
+
+For detailed contribution guidelines, please see CONTRIBUTING.md
+For community guidelines, please see CODE_OF_CONDUCT.md
