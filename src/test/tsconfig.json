@@ -1,0 +1,51 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "lib": ["ES2020", "DOM"],
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "@test/*": ["src/test/*"],
+      "@fixtures/*": ["src/test/fixtures/*"],
+      "@utils/*": ["src/test/utils/*"],
+      "@e2e/*": ["src/test/e2e/*"],
+      "@integration/*": ["src/test/integration/*"],
+      "@performance/*": ["src/test/performance/*"],
+      "@security/*": ["src/test/security/*"]
+    },
+    "types": ["node", "jest"],
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": true,
+    "isolatedModules": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "rootDir": ".",
+    "outDir": "./dist",
+    "sourceMap": true,
+    "declaration": true,
+    "composite": true,
+    "incremental": true
+  },
+  "include": [
+    "src/test/**/*.ts",
+    "src/test/**/*.tsx",
+    "src/test/**/*.json"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage"
+  ]
+}
