@@ -1,0 +1,140 @@
+{
+  "messages": [
+    {
+      "id": "123e4567-e89b-12d3-a456-426614174000",
+      "chatId": "987fcdeb-51a2-43d7-9876-543210987001",
+      "senderId": "456e7890-12d3-a456-426614174001",
+      "content": "Hey everyone! Where should we go for dinner tonight? 🍽️",
+      "timestamp": "2023-11-01T18:30:00.000Z",
+      "metadata": {
+        "type": "TEXT",
+        "formatting": {
+          "bold": false,
+          "italic": false,
+          "code": false,
+          "link": false,
+          "emoji": true
+        },
+        "mentions": [],
+        "aiContext": {}
+      }
+    },
+    {
+      "id": "123e4567-e89b-12d3-a456-426614174001",
+      "chatId": "987fcdeb-51a2-43d7-9876-543210987001",
+      "senderId": "456e7890-12d3-a456-426614174002",
+      "content": "@foodie Can you suggest some restaurants near downtown?",
+      "threadId": "123e4567-e89b-12d3-a456-426614174000",
+      "timestamp": "2023-11-01T18:31:00.000Z",
+      "metadata": {
+        "type": "TEXT",
+        "formatting": {
+          "bold": false,
+          "italic": false,
+          "code": false,
+          "link": false,
+          "emoji": false
+        },
+        "mentions": ["ai-agent-foodie-001"],
+        "aiContext": {}
+      }
+    },
+    {
+      "id": "123e4567-e89b-12d3-a456-426614174002",
+      "chatId": "987fcdeb-51a2-43d7-9876-543210987001",
+      "senderId": "ai-agent-foodie-001",
+      "content": "Based on your location and group preferences, I recommend:\n\n1. **Bistro Moderne** - Contemporary French cuisine 🇫🇷\n2. **Sushi Ko** - High-end Japanese dining 🍱\n3. **La Piazza** - Authentic Italian experience 🍝\n\nAll are within walking distance and have good vegetarian options!",
+      "threadId": "123e4567-e89b-12d3-a456-426614174000",
+      "timestamp": "2023-11-01T18:31:30.000Z",
+      "metadata": {
+        "type": "AI_RESPONSE",
+        "formatting": {
+          "bold": true,
+          "italic": false,
+          "code": false,
+          "link": false,
+          "emoji": true
+        },
+        "mentions": [],
+        "aiContext": {
+          "agentId": "ai-agent-foodie-001",
+          "contextType": "restaurant_recommendation",
+          "relevantInfo": "downtown location, group dining, vegetarian options",
+          "confidence": 0.95,
+          "sourceContext": ["user_preferences", "location_data", "restaurant_database"]
+        }
+      }
+    },
+    {
+      "id": "123e4567-e89b-12d3-a456-426614174003",
+      "chatId": "987fcdeb-51a2-43d7-9876-543210987001",
+      "senderId": "456e7890-12d3-a456-426614174001",
+      "content": "Let's vote on it!",
+      "timestamp": "2023-11-01T18:32:00.000Z",
+      "metadata": {
+        "type": "POLL",
+        "formatting": {
+          "bold": false,
+          "italic": false,
+          "code": false,
+          "link": false,
+          "emoji": false
+        },
+        "mentions": [],
+        "pollData": {
+          "question": "Where should we have dinner tonight?",
+          "options": [
+            "Bistro Moderne",
+            "Sushi Ko",
+            "La Piazza"
+          ],
+          "votes": {
+            "option0": ["456e7890-12d3-a456-426614174001"],
+            "option1": ["456e7890-12d3-a456-426614174002"],
+            "option2": []
+          },
+          "expiresAt": "2023-11-01T19:32:00.000Z",
+          "allowMultiple": false
+        }
+      }
+    },
+    {
+      "id": "123e4567-e89b-12d3-a456-426614174004",
+      "chatId": "987fcdeb-51a2-43d7-9876-543210987001",
+      "senderId": "system",
+      "content": "This chat has been inactive for 30 minutes. Would you like me to summarize the discussion?",
+      "timestamp": "2023-11-01T19:02:00.000Z",
+      "metadata": {
+        "type": "SYSTEM",
+        "formatting": {
+          "bold": false,
+          "italic": true,
+          "code": false,
+          "link": false,
+          "emoji": false
+        },
+        "mentions": [],
+        "aiContext": {}
+      }
+    },
+    {
+      "id": "123e4567-e89b-12d3-a456-426614174005",
+      "chatId": "987fcdeb-51a2-43d7-9876-543210987002",
+      "senderId": "456e7890-12d3-a456-426614174003",
+      "content": "```python\ndef hello_world():\n    print('Hello, World!')\n```\nCheck out this code snippet!",
+      "timestamp": "2023-11-01T19:15:00.000Z",
+      "metadata": {
+        "type": "TEXT",
+        "formatting": {
+          "bold": false,
+          "italic": false,
+          "code": true,
+          "link": false,
+          "emoji": false
+        },
+        "mentions": [],
+        "aiContext": {}
+      }
+    }
+  ]
+}
