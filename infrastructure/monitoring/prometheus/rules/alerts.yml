@@ -1,0 +1,110 @@
+# Prometheus Alert Rules Configuration v2.45.0
+# This file defines critical monitoring alerts for the AI-Enhanced Group Chat Platform
+# covering service performance, AI operations, and infrastructure health
+
+groups:
+- name: service_alerts
+  rules:
+  - alert: HighErrorRate
+    expr: service:error_rate:5m > 0.05
+    for: 5m
+    labels:
+      severity: critical
+      team: platform
+    annotations:
+      summary: High error rate detected
+      description: Service {{ $labels.service }} has error rate above 5% for 5 minutes
+
+  - alert: HighLatency
+    expr: service:latency:95percentile:5m > 2
+    for: 5m
+    labels:
+      severity: warning
+      team: platform
+    annotations:
+      summary: High latency detected
+      description: Service {{ $labels.service }} has 95th percentile latency above 2s
+
+  - alert: APIRequestThreshold
+    expr: rate(api_requests_total[1m]) > 1000
+    for: 1m
+    labels:
+      severity: warning
+      team: security
+    annotations:
+      summary: High API request rate
+      description: API Gateway receiving >1000 requests per minute
+
+  - alert: AuthFailureRate
+    expr: rate(auth_failures_total[1m]) > 5
+    for: 1m
+    labels:
+      severity: critical
+      team: security
+    annotations:
+      summary: High authentication failure rate
+      description: Auth service experiencing >5 failures per minute
+
+- name: ai_service_alerts
+  rules:
+  - alert: LowAgentSuccessRate
+    expr: ai:agent_success_rate:5m < 0.90
+    for: 5m
+    labels:
+      severity: critical
+      team: ai
+    annotations:
+      summary: Low AI agent success rate
+      description: AI agent {{ $labels.agent_type }} has success rate below 90%
+
+  - alert: HighResponseTime
+    expr: ai:response_time:95percentile:5m > 5
+    for: 2m
+    labels:
+      severity: warning
+      team: ai
+    annotations:
+      summary: High AI response time
+      description: AI agent {{ $labels.agent_type }} has 95th percentile response time above 5s
+
+  - alert: AbnormalUsagePattern
+    expr: abs(rate(ai_requests_total[5m]) - avg_over_time(ai_requests_total[1h])) > 3 * stddev_over_time(ai_requests_total[1h])
+    for: 5m
+    labels:
+      severity: warning
+      team: ai
+    annotations:
+      summary: Abnormal AI usage pattern detected
+      description: AI service usage pattern deviating significantly from normal
+
+- name: resource_alerts
+  rules:
+  - alert: HighMemoryUsage
+    expr: resource:memory_usage:5m > 0.85
+    for: 10m
+    labels:
+      severity: warning
+      team: infrastructure
+    annotations:
+      summary: High memory usage
+      description: Service {{ $labels.service }} is using >85% of allocated memory
+
+  - alert: HighCPUUsage
+    expr: resource:cpu_usage:5m > 0.80
+    for: 10m
+    labels:
+      severity: warning
+      team: infrastructure
+    annotations:
+      summary: High CPU usage
+      description: Service {{ $labels.service }} is using >80% of CPU resources
+
+  - alert: RegionHealthCheck
+    expr: sum(up{job=~".*-service"}) by (region) < 0.9 * count(up{job=~".*-service"}) by (region)
+    for: 5m
+    labels:
+      severity: critical
+      team: infrastructure
+    annotations:
+      summary: Region health degraded
+      description: Region {{ $labels.region }} has less than 90% of services healthy
