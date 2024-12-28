@@ -1,0 +1,213 @@
+# API Gateway Kubernetes Configuration
+# Version: 1.0.0
+# This configuration implements a secure, scalable API Gateway deployment
+# with comprehensive monitoring, security controls, and service mesh integration
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  labels:
+    app: api-gateway
+    component: gateway
+    version: v1
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "3000"
+    prometheus.io/path: "/metrics"
+    linkerd.io/inject: "enabled"
+    vault.hashicorp.com/agent-inject: "true"
+    vault.hashicorp.com/role: "api-gateway"
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+        component: gateway
+        version: v1
+      annotations:
+        checksum/config: ${CONFIG_CHECKSUM}
+    spec:
+      # Enhanced security context based on security requirements
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        allowPrivilegeEscalation: false
+      containers:
+      - name: api-gateway
+        image: ${API_GATEWAY_IMAGE}
+        imagePullPolicy: Always
+        securityContext:
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+        ports:
+        - name: http
+          containerPort: 3000
+          protocol: TCP
+        - name: metrics
+          containerPort: 9090
+          protocol: TCP
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3000"
+        # Rate limiting configuration from rate-limit.config.ts
+        - name: RATE_LIMIT_WINDOW_MS
+          value: "60000"
+        - name: RATE_LIMIT_MAX_REQUESTS
+          value: "1000"
+        - name: RATE_LIMIT_AUTH_MAX
+          value: "5"
+        - name: RATE_LIMIT_AI_MAX
+          value: "100"
+        # CORS configuration from cors.config.ts
+        - name: ALLOWED_ORIGINS
+          valueFrom:
+            configMapKeyRef:
+              name: api-gateway-config
+              key: ALLOWED_ORIGINS
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: api-gateway-secrets
+              key: REDIS_URL
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 20
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 2
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+          readOnly: true
+        - name: tmp
+          mountPath: /tmp
+        - name: certs
+          mountPath: /etc/certs
+          readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          name: api-gateway-config
+      - name: tmp
+        emptyDir: {}
+      - name: certs
+        secret:
+          secretName: api-gateway-tls
+      serviceAccountName: api-gateway-sa
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api-gateway-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: api-gateway
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 300
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: api-gateway-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: api-gateway
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 3000
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 9090
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: message-service
+    - podSelector:
+        matchLabels:
+          app: user-service
+    - podSelector:
+        matchLabels:
+          app: ai-service
+    - podSelector:
+        matchLabels:
+          app: redis
+    ports:
+    - protocol: TCP
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: api-gateway-pdb
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: api-gateway
