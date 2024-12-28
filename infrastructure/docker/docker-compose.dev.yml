@@ -1,0 +1,239 @@
+version: '3.8'
+
+services:
+  # API Gateway Service
+  api-gateway:
+    build:
+      context: ../../src/backend
+      dockerfile: Dockerfile.api
+    ports:
+      - "3000:3000"  # Main API port
+      - "9229:9229"  # Node.js debugging port
+    volumes:
+      - ../../src/backend/api-gateway:/app
+      - ../../node_modules:/app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DEBUG=app:*
+      - DEBUG_PORT=9229
+      - REDIS_URL=redis://redis:6379/0
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - user-service
+      - message-service
+      - ai-service
+      - redis
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    networks:
+      - chat-dev-network
+
+  # Message Service
+  message-service:
+    build:
+      context: ../../src/backend
+      dockerfile: Dockerfile.message
+    ports:
+      - "3001:3000"  # Service port
+      - "9230:9229"  # Debug port
+    volumes:
+      - ../../src/backend/message-service:/app
+      - ../../node_modules:/app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DEBUG=app:*
+      - DEBUG_PORT=9229
+      - MONGODB_URI=mongodb://mongodb:27017/chat_dev
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - mongodb
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    networks:
+      - chat-dev-network
+
+  # User Service
+  user-service:
+    build:
+      context: ../../src/backend
+      dockerfile: Dockerfile.user
+    ports:
+      - "3002:3000"  # Service port
+      - "9231:9229"  # Debug port
+    volumes:
+      - ../../src/backend/user-service:/app
+      - ../../node_modules:/app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DEBUG=app:*
+      - DEBUG_PORT=9229
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=users_dev
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres_dev
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    networks:
+      - chat-dev-network
+
+  # AI Service
+  ai-service:
+    build:
+      context: ../../src/backend
+      dockerfile: Dockerfile.ai
+    ports:
+      - "3003:8000"  # FastAPI port
+      - "5678:5678"  # Python debugger port
+    volumes:
+      - ../../src/backend/ai-service:/app
+      - ../../python_packages:/usr/local/lib/python3.11/site-packages
+    environment:
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+      - DEBUG=1
+      - MILVUS_HOST=milvus
+      - MILVUS_PORT=19530
+      - DEBUGPY_PORT=5678
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - milvus
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+    networks:
+      - chat-dev-network
+
+  # MongoDB
+  mongodb:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGODB_DATABASE=chat_dev
+    command: ["--logpath", "/dev/null", "--setParameter", "enableLocalhostAuthBypass=1"]
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - chat-dev-network
+
+  # PostgreSQL
+  postgres:
+    image: postgres:14
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=users_dev
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres_dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - chat-dev-network
+
+  # Redis
+  redis:
+    image: redis:7.0-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes", "--save", "60", "1"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - chat-dev-network
+
+  # Milvus
+  milvus:
+    image: milvus/milvus:2.2.11
+    ports:
+      - "19530:19530"
+    environment:
+      - MILVUS_HOST=milvus
+      - MILVUS_PORT=19530
+    volumes:
+      - milvus_data:/var/lib/milvus
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:19530/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - chat-dev-network
+
+volumes:
+  mongodb_data:
+    driver: local
+    name: chat-dev-mongodb-data
+  postgres_data:
+    driver: local
+    name: chat-dev-postgres-data
+  redis_data:
+    driver: local
+    name: chat-dev-redis-data
+  milvus_data:
+    driver: local
+    name: chat-dev-milvus-data
+
+networks:
+  chat-dev-network:
+    driver: bridge
+    name: chat-dev-network
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
+    labels:
+      environment: development
+      project: ai-chat
