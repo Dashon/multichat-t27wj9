@@ -1,0 +1,174 @@
+# Artillery load testing configuration for WebSocket performance testing
+# Dependencies:
+# - socket.io-client: ^4.7.2
+# - @faker-js/faker: ^8.0.2
+
+config:
+  target: "http://localhost:3001"  # WebSocket server endpoint
+  phases:
+    - name: "Warm up"
+      duration: 60
+      arrivalRate: 5
+      rampTo: 50
+    - name: "Sustained load"
+      duration: 300
+      arrivalRate: 50
+    - name: "Peak load"
+      duration: 60
+      arrivalRate: 50
+      rampTo: 100
+  
+  ws:
+    # WebSocket specific configuration
+    path: "/chat"
+    subprotocols: ["websocket"]
+    rejectUnauthorized: false
+    
+  processor: "./websocket-functions.js"
+  
+  engines:
+    socketio-v4:
+      version: "~4.7.2"
+  
+  variables:
+    # Test data configuration
+    messageTypes: ["text", "reaction", "poll"]
+    payloadSizes: [100, 1000, 10000]  # bytes
+    thinkTime: 
+      min: 1
+      max: 5
+
+  # Performance thresholds
+  ensure:
+    - metric: "connection_time"
+      threshold: "p95 < 1000"  # 95th percentile < 1s
+    - metric: "message_latency"
+      threshold: "p95 < 2000"  # 95th percentile < 2s
+    - metric: "messages_per_second"
+      threshold: ">= 1000"     # Minimum 1000 msgs/sec
+    - metric: "error_rate"
+      threshold: "< 1%"        # Error rate < 1%
+    - metric: "concurrent_users"
+      threshold: "< 5000"      # Max concurrent users
+
+scenarios:
+  - name: "websocket_chat_flow"
+    weight: 1
+    engine: "socketio-v4"
+    flow:
+      # Initialize connection
+      - function: "beforeScenario"
+      
+      # Connect and authenticate
+      - connect:
+          headers:
+            Authorization: "Bearer {{ $processEnvironment.TEST_JWT_TOKEN }}"
+            X-Client-Version: "1.0.0"
+      
+      # Join chat rooms
+      - emit:
+          channel: "join_room"
+          data: "{{ $processEnvironment.TEST_ROOM_ID }}"
+          response:
+            channel: "room_joined"
+            data:
+              status: "success"
+          timeout: 5000
+      
+      # Send messages with varying payload sizes
+      - loop:
+          - think: "{{ $randomNumber(1, 5) }}"
+          - function: "generateMessage"
+          - emit:
+              channel: "message"
+              data: "{{ message }}"
+              response:
+                channel: "message_sent"
+                data:
+                  status: "delivered"
+              capture:
+                - json: "$.messageId"
+                  as: "lastMessageId"
+          - think: 1
+          - function: "validateMessageDelivery"
+        count: 10
+      
+      # Test concurrent message handling
+      - parallel:
+          - emit:
+              channel: "message"
+              data: "{{ generateQuickMessage }}"
+          - emit:
+              channel: "reaction"
+              data:
+                messageId: "{{ lastMessageId }}"
+                type: "like"
+      
+      # Simulate user interactions
+      - think: "{{ thinkTime }}"
+      - function: "simulateUserActivity"
+      
+      # Cleanup and disconnect
+      - function: "afterScenario"
+
+before:
+  flow:
+    # Global setup before test execution
+    - log: "Starting WebSocket load test"
+    - function: "setupGlobalTestData"
+
+after:
+  flow:
+    # Global cleanup after test execution
+    - log: "Completed WebSocket load test"
+    - function: "generateTestReport"
+
+plugins:
+  # Metrics collection plugins
+  metrics-by-endpoint:
+    # Track metrics per WebSocket event type
+    enabled: true
+    blacklist: ["ping", "pong"]
+  
+  expect:
+    # Response validation plugin
+    enabled: true
+    
+  apdex:
+    # Application Performance Index tracking
+    enabled: true
+    threshold: 500
+
+  statsd:
+    # StatsD metrics export
+    host: "localhost"
+    port: 8125
+    prefix: "websocket_test"
+
+socketio:
+  # Socket.IO specific settings
+  transports: ["websocket"]
+  upgrade: false
+  forceNew: true
+  reconnection: true
+  reconnectionAttempts: 3
+  reconnectionDelay: 1000
+  timeout: 10000
+  query:
+    clientType: "loadTest"
+    version: "1.0.0"
+
+reporting:
+  # Test execution reporting configuration
+  format: ["text", "json", "junit"]
+  output:
+    - "reports/websocket-load-test-report.json"
+    - "reports/websocket-load-test-report.xml"
+  metrics:
+    - connection_time
+    - message_latency
+    - concurrent_users
+    - messages_per_second
+    - error_rate
+    - cpu
+    - memory
