@@ -1,0 +1,251 @@
+{
+  "common": {
+    "buttons": {
+      "submit": "Submit",
+      "cancel": "Cancel",
+      "save": "Save",
+      "delete": "Delete",
+      "edit": "Edit",
+      "create": "Create",
+      "send": "Send",
+      "close": "Close",
+      "back": "Back",
+      "next": "Next",
+      "confirm": "Confirm",
+      "retry": "Try Again"
+    },
+    "labels": {
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "search": "Search",
+      "username": "Username",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "phoneNumber": "Phone Number",
+      "dateJoined": "Date Joined",
+      "lastActive": "Last Active",
+      "status": "Status"
+    },
+    "errors": {
+      "required": "This field is required",
+      "invalidEmail": "Invalid email address",
+      "passwordMismatch": "Passwords do not match",
+      "networkError": "Network error occurred",
+      "unknownError": "An unknown error occurred",
+      "invalidInput": "Invalid input provided",
+      "unauthorized": "Unauthorized access",
+      "forbidden": "Access forbidden",
+      "notFound": "Resource not found",
+      "serverError": "Server error occurred"
+    },
+    "success": {
+      "saved": "Successfully saved",
+      "updated": "Successfully updated",
+      "deleted": "Successfully deleted",
+      "created": "Successfully created",
+      "sent": "Successfully sent",
+      "uploaded": "Successfully uploaded"
+    },
+    "aria": {
+      "loading": "Content is loading",
+      "menuOpen": "Menu is open",
+      "menuClosed": "Menu is closed",
+      "modalOpen": "Dialog is open",
+      "modalClosed": "Dialog is closed",
+      "required": "Required field",
+      "error": "Error",
+      "success": "Success",
+      "warning": "Warning",
+      "info": "Information",
+      "selected": "Selected",
+      "expanded": "Expanded",
+      "collapsed": "Collapsed",
+      "checked": "Checked",
+      "unchecked": "Unchecked"
+    },
+    "screenReader": {
+      "skipToMain": "Skip to main content",
+      "navigationStart": "Start of navigation",
+      "navigationEnd": "End of navigation",
+      "listStart": "Start of list",
+      "listEnd": "End of list",
+      "loading": "Please wait while content loads",
+      "updated": "Content has been updated",
+      "errorOccurred": "An error has occurred",
+      "pageLoaded": "Page has finished loading",
+      "newContentAvailable": "New content is available",
+      "actionSuccessful": "Action completed successfully",
+      "actionFailed": "Action failed to complete"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "subtitle": "Welcome back",
+      "forgotPassword": "Forgot password?",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up",
+      "rememberMe": "Remember me",
+      "aria": {
+        "loginForm": "Login form",
+        "emailInput": "Enter your email address",
+        "passwordInput": "Enter your password",
+        "submitButton": "Click to log in",
+        "forgotPasswordLink": "Reset your password",
+        "signUpLink": "Create a new account",
+        "rememberMeCheckbox": "Remember login credentials"
+      }
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Join our community",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "aria": {
+        "registerForm": "Registration form",
+        "usernameInput": "Choose a username",
+        "emailInput": "Enter your email address",
+        "passwordInput": "Choose a password",
+        "confirmPasswordInput": "Confirm your password",
+        "submitButton": "Create your account"
+      }
+    }
+  },
+  "chat": {
+    "messages": {
+      "placeholder": "Type a message...",
+      "mention": "Mention someone with @",
+      "newMessage": "New message",
+      "edited": "Edited",
+      "deleted": "This message was deleted",
+      "replyTo": "Reply to {username}",
+      "forwarded": "Forwarded message",
+      "aria": {
+        "messageList": "Chat message list",
+        "messageInput": "Type your message",
+        "sendButton": "Send message",
+        "attachmentButton": "Add attachment",
+        "emojiButton": "Add emoji",
+        "mentionList": "List of people you can mention",
+        "messageContext": "Message context menu",
+        "replyThread": "Message reply thread",
+        "editMessage": "Edit message",
+        "deleteMessage": "Delete message"
+      }
+    },
+    "groups": {
+      "create": "Create Group",
+      "join": "Join Group",
+      "leave": "Leave Group",
+      "members": "Group Members",
+      "settings": "Group Settings",
+      "aria": {
+        "groupList": "List of chat groups",
+        "memberList": "List of group members",
+        "createGroup": "Create new group",
+        "leaveGroup": "Leave current group",
+        "groupSettings": "Group settings menu"
+      }
+    }
+  },
+  "ai": {
+    "agents": {
+      "explorer": "Travel Explorer",
+      "foodie": "Food Expert",
+      "planner": "Event Planner",
+      "mention": "Mention an AI agent with @",
+      "thinking": "AI is thinking...",
+      "error": "AI response error",
+      "suggestions": "AI Suggestions",
+      "context": "AI Context",
+      "aria": {
+        "agentList": "Available AI agents",
+        "agentResponse": "AI agent response",
+        "agentTyping": "AI agent is generating a response",
+        "agentError": "Error in AI response",
+        "contextUpdate": "AI context is being updated",
+        "suggestionList": "List of AI suggestions",
+        "agentSelection": "Select an AI agent",
+        "responseStatus": "AI response status"
+      }
+    },
+    "features": {
+      "polls": "Create Poll",
+      "recommendations": "Get Recommendations",
+      "planning": "Plan Event",
+      "analysis": "Analyze Discussion",
+      "aria": {
+        "createPoll": "Create new poll",
+        "pollOptions": "Poll options list",
+        "recommendationList": "List of recommendations",
+        "planningTools": "Event planning tools",
+        "analysisResults": "Discussion analysis results"
+      }
+    }
+  },
+  "settings": {
+    "profile": {
+      "title": "Profile Settings",
+      "personalInfo": "Personal Information",
+      "preferences": "Preferences",
+      "privacy": "Privacy Settings",
+      "aria": {
+        "profileForm": "Profile settings form",
+        "uploadAvatar": "Upload profile picture",
+        "privacyOptions": "Privacy options",
+        "preferencesMenu": "User preferences menu"
+      }
+    },
+    "notifications": {
+      "title": "Notification Settings",
+      "messages": "Message Notifications",
+      "mentions": "Mention Notifications",
+      "groups": "Group Notifications",
+      "aria": {
+        "notificationForm": "Notification settings form",
+        "soundOptions": "Notification sound options",
+        "emailOptions": "Email notification options"
+      }
+    }
+  },
+  "accessibility": {
+    "navigation": {
+      "mainMenu": "Main menu navigation",
+      "userMenu": "User menu navigation",
+      "chatList": "Chat list navigation",
+      "settings": "Settings navigation",
+      "backToTop": "Back to top",
+      "skipLinks": "Skip navigation links"
+    },
+    "announcements": {
+      "newMessage": "New message received",
+      "errorState": "An error has occurred. Please try again",
+      "loadingState": "Please wait while content loads",
+      "successState": "Action completed successfully",
+      "aiResponse": "AI agent has responded",
+      "pollCreated": "New poll has been created",
+      "memberJoined": "New member has joined the chat",
+      "memberLeft": "Member has left the chat",
+      "statusChange": "Status has changed to {status}",
+      "contentUpdate": "Content has been updated"
+    },
+    "descriptions": {
+      "imageAlt": "Image of {description}",
+      "buttonAction": "Button to {action}",
+      "linkDestination": "Link to {destination}",
+      "inputPurpose": "Input field for {purpose}",
+      "statusIndicator": "Status: {status}",
+      "iconPurpose": "Icon indicating {purpose}",
+      "decorative": "Decorative element",
+      "landmark": "Region for {purpose}"
+    },
+    "focus": {
+      "trapStart": "Start of focused region",
+      "trapEnd": "End of focused region",
+      "returnToTrigger": "Return to triggering element",
+      "mainContent": "Main content area"
+    }
+  }
+}
