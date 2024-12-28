@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1a1a1a" />
+    <meta name="description" content="AI-Enhanced Group Chat Platform with intelligent agent assistance" />
+    
+    <!-- Security Headers -->
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+    
+    <!-- PWA Support -->
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="favicon.ico" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
+    
+    <!-- Preconnect to External Resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Material Design Resources -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+    
+    <title>AI-Enhanced Group Chat</title>
+    
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" 
+          content="default-src 'self'; 
+                   connect-src 'self' wss://* https://*; 
+                   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
+                   font-src 'self' https://fonts.gstatic.com; 
+                   img-src 'self' data: https:; 
+                   script-src 'self'" />
+
+    <!-- PWA Theme Handling -->
+    <script>
+        // Handle theme synchronization
+        if (typeof window !== 'undefined') {
+            const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            const root = document.documentElement;
+            
+            const updateTheme = (isDark) => {
+                root.style.colorScheme = isDark ? 'dark' : 'light';
+                document.querySelector('meta[name="theme-color"]').content = 
+                    isDark ? '#1a1a1a' : '#ffffff';
+            };
+            
+            updateTheme(darkModeMediaQuery.matches);
+            darkModeMediaQuery.addListener((e) => updateTheme(e.matches));
+        }
+    </script>
+</head>
+<body>
+    <!-- Accessibility: Skip to main content -->
+    <a href="#root" class="skip-link" style="position: absolute; left: -9999px;">
+        Skip to main content
+    </a>
+    
+    <noscript>
+        <div role="alert" style="padding: 20px; text-align: center; font-family: system-ui, -apple-system, sans-serif;">
+            You need to enable JavaScript to run this application.
+            This is required for the AI-Enhanced Group Chat Platform to function properly.
+        </div>
+    </noscript>
+    
+    <!-- React Mount Point -->
+    <div id="root" role="main"></div>
+    
+    <!-- Browser Support Check -->
+    <script>
+        // Check for minimum browser requirements
+        try {
+            const requirements = [
+                'Promise' in window,
+                'fetch' in window,
+                'WebSocket' in window,
+                'localStorage' in window,
+                'CSS' in window && 'supports' in CSS,
+                'serviceWorker' in navigator
+            ];
+            
+            if (!requirements.every(Boolean)) {
+                document.getElementById('root').innerHTML = 
+                    '<div style="padding: 20px; text-align: center; font-family: system-ui;">' +
+                    'Your browser is not supported. Please use a modern browser like ' +
+                    'Chrome 90+, Firefox 90+, Safari 14+, or Edge 90+.' +
+                    '</div>';
+            }
+        } catch (e) {
+            console.error('Browser compatibility check failed:', e);
+        }
+    </script>
+</body>
+</html>
