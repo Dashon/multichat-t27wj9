@@ -1,0 +1,151 @@
+syntax = "proto3";
+
+package message;
+
+import "google/protobuf/timestamp.proto";  // v3.0.0
+import "google/protobuf/empty.proto";      // v3.0.0
+import "google/protobuf/wrappers.proto";   // v3.0.0
+
+option go_package = "github.com/org/repo/proto/message";
+option java_multiple_files = true;
+option optimize_for = SPEED;
+
+// MessageService provides gRPC endpoints for real-time messaging with AI integration
+service MessageService {
+  // SendMessage sends a new message in a chat with AI integration support
+  rpc SendMessage(SendMessageRequest) returns (SendMessageResponse) {}
+  
+  // GetMessages retrieves messages for a chat with pagination and threading support
+  rpc GetMessages(GetMessagesRequest) returns (GetMessagesResponse) {}
+  
+  // StreamMessages establishes a bidirectional stream for real-time message updates
+  rpc StreamMessages(StreamMessagesRequest) returns (stream Message) {}
+}
+
+// Message represents a chat message with AI support capabilities
+message Message {
+  string id = 1;
+  string chat_id = 2;
+  string sender_id = 3;
+  string content = 4;
+  google.protobuf.StringValue thread_id = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+  MessageMetadata metadata = 8;
+  AIContext ai_context = 9;
+  repeated Reaction reactions = 10;
+  MessageStatus status = 11;
+}
+
+// MessageMetadata contains enhanced message metadata
+message MessageMetadata {
+  MessageType type = 1;
+  map<string, string> formatting = 2;
+  repeated string mentions = 3;
+  repeated string ai_agent_mentions = 4;
+  map<string, string> custom_attributes = 5;
+  bool is_edited = 6;
+  MessageVisibility visibility = 7;
+}
+
+// AIContext contains AI-specific context for messages
+message AIContext {
+  string agent_id = 1;
+  string context_id = 2;
+  map<string, string> parameters = 3;
+  repeated string referenced_messages = 4;
+  AIResponseType response_type = 5;
+  map<string, string> confidence_scores = 6;
+}
+
+// Reaction represents a user reaction to a message
+message Reaction {
+  string user_id = 1;
+  string emoji = 2;
+  google.protobuf.Timestamp created_at = 3;
+}
+
+// SendMessageRequest contains data for sending a new message
+message SendMessageRequest {
+  string chat_id = 1;
+  string content = 2;
+  google.protobuf.StringValue thread_id = 3;
+  MessageMetadata metadata = 4;
+}
+
+// SendMessageResponse contains the result of sending a message
+message SendMessageResponse {
+  Message message = 1;
+  bool ai_processing_triggered = 2;
+  repeated string triggered_agent_ids = 3;
+}
+
+// GetMessagesRequest contains parameters for retrieving messages
+message GetMessagesRequest {
+  string chat_id = 1;
+  google.protobuf.StringValue thread_id = 2;
+  int32 page_size = 3;
+  string page_token = 4;
+  MessageFilter filter = 5;
+}
+
+// GetMessagesResponse contains paginated message results
+message GetMessagesResponse {
+  repeated Message messages = 1;
+  string next_page_token = 2;
+  int32 total_count = 3;
+}
+
+// StreamMessagesRequest contains parameters for message streaming
+message StreamMessagesRequest {
+  string chat_id = 1;
+  google.protobuf.StringValue thread_id = 2;
+  bool include_ai_responses = 3;
+  MessageFilter filter = 4;
+}
+
+// MessageFilter contains filtering options for message queries
+message MessageFilter {
+  repeated MessageType types = 1;
+  google.protobuf.Timestamp since = 2;
+  google.protobuf.Timestamp until = 3;
+  repeated string sender_ids = 4;
+  bool include_ai_messages = 5;
+}
+
+// MessageType enumerates the types of messages supported
+enum MessageType {
+  MESSAGE_TYPE_UNSPECIFIED = 0;
+  TEXT = 1;
+  AI_RESPONSE = 2;
+  POLL = 3;
+  SYSTEM = 4;
+  THREAD_REPLY = 5;
+}
+
+// MessageStatus represents the delivery status of a message
+enum MessageStatus {
+  MESSAGE_STATUS_UNSPECIFIED = 0;
+  SENDING = 1;
+  DELIVERED = 2;
+  READ = 3;
+  FAILED = 4;
+}
+
+// MessageVisibility defines who can see a message
+enum MessageVisibility {
+  MESSAGE_VISIBILITY_UNSPECIFIED = 0;
+  ALL = 1;
+  PARTICIPANTS = 2;
+  SENDER_ONLY = 3;
+}
+
+// AIResponseType defines the type of AI response
+enum AIResponseType {
+  AI_RESPONSE_TYPE_UNSPECIFIED = 0;
+  DIRECT_RESPONSE = 1;
+  SUGGESTION = 2;
+  CLARIFICATION = 3;
+  PROACTIVE = 4;
+  ERROR = 5;
+}
