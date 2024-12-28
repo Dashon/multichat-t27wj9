@@ -1,0 +1,156 @@
+# Development Environment Kustomization Configuration
+# Version: 1.0.0
+# Dependencies:
+# - kustomize v5.0.0
+# - kubernetes v1.25+
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Base configurations to customize
+resources:
+- ../../base/ai-service.yaml
+- ../../base/api-gateway.yaml
+- ../../base/message-service.yaml
+- namespace.yaml
+
+# Target namespace for all resources
+namespace: chat-platform-dev
+
+# Common labels for all resources
+commonLabels:
+  environment: development
+  managed-by: kustomize
+  app.kubernetes.io/part-of: chat-platform
+  app.kubernetes.io/environment: dev
+
+# Development-specific patches for AI Service
+patches:
+- target:
+    kind: Deployment
+    name: ai-service
+  patch: |
+    spec:
+      replicas: 1
+      template:
+        spec:
+          containers:
+          - name: ai-service
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+                nvidia.com/gpu: 0
+              limits:
+                cpu: 500m
+                memory: 512Mi
+                nvidia.com/gpu: 0
+            env:
+            - name: LOG_LEVEL
+              value: "debug"
+            - name: ENABLE_DEBUG
+              value: "true"
+            - name: PYTHONUNBUFFERED
+              value: "1"
+
+# Development-specific patches for API Gateway
+- target:
+    kind: Deployment
+    name: api-gateway
+  patch: |
+    spec:
+      replicas: 1
+      template:
+        spec:
+          containers:
+          - name: api-gateway
+            resources:
+              requests:
+                cpu: 100m
+                memory: 128Mi
+              limits:
+                cpu: 200m
+                memory: 256Mi
+            env:
+            - name: NODE_ENV
+              value: "development"
+            - name: LOG_LEVEL
+              value: "debug"
+            - name: RATE_LIMIT_WINDOW_MS
+              value: "60000"
+            - name: RATE_LIMIT_MAX_REQUESTS
+              value: "1000"
+            - name: CORS_ORIGIN
+              value: "http://localhost:3000"
+
+# Development-specific patches for Message Service
+- target:
+    kind: Deployment
+    name: message-service
+  patch: |
+    spec:
+      replicas: 1
+      template:
+        spec:
+          containers:
+          - name: message-service
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+              limits:
+                cpu: 300m
+                memory: 512Mi
+            env:
+            - name: NODE_ENV
+              value: "development"
+            - name: LOG_LEVEL
+              value: "debug"
+            - name: MONGODB_DB
+              value: "messages_dev"
+            - name: WS_PATH
+              value: "/chat"
+            - name: REDIS_KEY_PREFIX
+              value: "msg-svc-dev:"
+
+# Configure images for development
+images:
+- name: ai-service
+  newTag: dev
+- name: api-gateway
+  newTag: dev
+- name: message-service
+  newTag: dev
+
+# Generate development environment ConfigMap
+configMapGenerator:
+- name: dev-env-config
+  literals:
+  - ENV=development
+  - LOG_LEVEL=debug
+  - ENABLE_DEBUG=true
+  - CORS_ORIGIN=http://localhost:3000
+  - WS_PATH=/chat
+  - REDIS_KEY_PREFIX=msg-svc-dev:
+
+# Configure resource quotas for development namespace
+- name: dev-resource-quota
+  literals:
+  - cpu-limit=2
+  - memory-limit=4Gi
+  - pods-max=10
+
+# Configure HPA behavior for development
+patchesJson6902:
+- target:
+    group: autoscaling
+    version: v2
+    kind: HorizontalPodAutoscaler
+    name: message-service-hpa
+  patch: |
+    - op: replace
+      path: /spec/minReplicas
+      value: 1
+    - op: replace
+      path: /spec/maxReplicas
+      value: 3
