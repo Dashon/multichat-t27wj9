@@ -1,0 +1,161 @@
+version: '3.8'
+
+# Global settings
+x-defaults: &defaults
+  restart: unless-stopped
+  networks:
+    - test-network
+
+# Service health check defaults
+x-healthcheck: &healthcheck_defaults
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 15s
+
+services:
+  # Main test runner service
+  test_runner:
+    <<: *defaults
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+      args:
+        NODE_VERSION: '18'
+        PYTHON_VERSION: '3.11'
+    container_name: ai-chat-test-runner
+    environment:
+      - NODE_ENV=test
+      - TEST_MONGODB_URI=mongodb://mongodb:27017/test_chat_db
+      - TEST_POSTGRES_URI=postgresql://postgres:5432/test_user_db
+      - TEST_REDIS_URI=redis://redis:6379/0
+      - TEST_MILVUS_URI=milvus:19530
+      - TEST_API_GATEWAY_URL=http://localhost:3000
+      - TEST_MESSAGE_SERVICE_URL=http://localhost:3001
+      - TEST_AI_SERVICE_URL=http://localhost:3002
+      - TEST_LOG_LEVEL=error
+      - TEST_TIMEOUT=30000
+      - TEST_DB_CLEANUP_ENABLED=true
+      - TEST_MOCK_EXTERNAL_SERVICES=true
+    volumes:
+      - ../:/app/test
+      - ./test-results:/app/test-results
+      - ./coverage:/app/coverage
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      milvus:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck_defaults
+      test: ["CMD", "node", "healthcheck.js"]
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: '4G'
+
+  # MongoDB service for message storage
+  mongodb:
+    <<: *defaults
+    image: mongo:6.0
+    container_name: ai-chat-test-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=test_chat_db
+      - MONGODB_ENABLE_JOURNAL=true
+    volumes:
+      - mongodb_test_data:/data/db
+      - ./mongo-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      <<: *healthcheck_defaults
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: '2G'
+
+  # PostgreSQL service for user data
+  postgres:
+    <<: *defaults
+    image: postgres:14
+    container_name: ai-chat-test-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=test_user_db
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      <<: *healthcheck_defaults
+      test: ["CMD-SHELL", "pg_isready"]
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: '2G'
+
+  # Redis service for caching
+  redis:
+    <<: *defaults
+    image: redis:7.0
+    container_name: ai-chat-test-redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_test_data:/data
+    healthcheck:
+      <<: *healthcheck_defaults
+      test: ["CMD", "redis-cli", "ping"]
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: '1G'
+
+  # Milvus service for AI vector storage
+  milvus:
+    <<: *defaults
+    image: milvus:2.2
+    container_name: ai-chat-test-milvus
+    ports:
+      - "19530:19530"
+    environment:
+      - MILVUS_HOST=milvus
+      - MILVUS_PORT=19530
+      - MILVUS_ENABLE_MONITOR=true
+    volumes:
+      - milvus_test_data:/var/lib/milvus
+    healthcheck:
+      <<: *healthcheck_defaults
+      test: ["CMD", "curl", "-f", "http://localhost:9091/metrics"]
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: '4G'
+
+networks:
+  test-network:
+    name: ai-chat-test-network
+    driver: bridge
+
+volumes:
+  mongodb_test_data:
+    name: ai-chat-test-mongodb-data
+  postgres_test_data:
+    name: ai-chat-test-postgres-data
+  redis_test_data:
+    name: ai-chat-test-redis-data
+  milvus_test_data:
+    name: ai-chat-test-milvus-data
