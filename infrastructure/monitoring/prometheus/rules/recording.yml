@@ -1,0 +1,87 @@
+# Prometheus Recording Rules Configuration v2.45.0
+# This file defines pre-computed metrics and aggregations for efficient monitoring
+# Evaluation interval: 30s
+
+groups:
+  # Service Performance Metrics
+  - name: service_performance_rules
+    interval: 30s
+    rules:
+      # Error rate per service over 5m window
+      - record: service:error_rate:5m
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m])) by (service) 
+          / 
+          sum(rate(http_requests_total[5m])) by (service)
+        labels:
+          team: platform
+
+      # 95th percentile latency per service over 5m window
+      - record: service:latency:95percentile:5m
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service))
+        labels:
+          team: platform
+
+      # Request rate per service over 5m window
+      - record: service:request_rate:5m
+        expr: sum(rate(http_requests_total[5m])) by (service)
+        labels:
+          team: platform
+
+  # AI Service Specific Metrics
+  - name: ai_service_rules
+    interval: 30s
+    rules:
+      # AI agent success rate over 5m window
+      - record: ai:agent_success_rate:5m
+        expr: |
+          sum(rate(ai_agent_responses_total{status="success"}[5m])) by (agent_type)
+          /
+          sum(rate(ai_agent_responses_total[5m])) by (agent_type)
+        labels:
+          team: ai
+
+      # AI agent 95th percentile response time over 5m window
+      - record: ai:response_time:95percentile:5m
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(ai_response_duration_seconds_bucket[5m])) by (le, agent_type))
+        labels:
+          team: ai
+
+      # AI agent usage rate over 5m window
+      - record: ai:agent_usage:5m
+        expr: sum(rate(ai_agent_requests_total[5m])) by (agent_type)
+        labels:
+          team: ai
+
+  # Resource Utilization Metrics
+  - name: resource_utilization_rules
+    interval: 30s
+    rules:
+      # Memory usage ratio per service over 5m window
+      - record: resource:memory_usage:5m
+        expr: |
+          sum(container_memory_usage_bytes) by (service)
+          /
+          sum(container_memory_limit_bytes) by (service)
+        labels:
+          team: infrastructure
+
+      # CPU usage ratio per service over 5m window
+      - record: resource:cpu_usage:5m
+        expr: |
+          sum(rate(container_cpu_usage_seconds_total[5m])) by (service)
+          /
+          sum(container_cpu_limit_cores) by (service)
+        labels:
+          team: infrastructure
+
+      # Network usage per service over 5m window
+      - record: resource:network_usage:5m
+        expr: |
+          sum(rate(container_network_transmit_bytes_total[5m])) by (service)
+        labels:
+          team: infrastructure
