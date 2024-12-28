@@ -1,0 +1,298 @@
+{
+  "testUsers": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "email": "user@example.com",
+      "username": "regularUser",
+      "password": "$2b$10$dGzqQB4x8Y9XH5vvYwLqVOK9Jy2ZGJ3Kj.U5vX9Kj.U5vX9Kj.U5vX",
+      "role": "USER",
+      "settings": {
+        "theme": "SYSTEM",
+        "notifications": true,
+        "language": "en",
+        "timezone": "America/New_York",
+        "fontScale": 1.0,
+        "highContrast": false
+      },
+      "securityMetadata": {
+        "securityLevel": 1,
+        "isVerified": true,
+        "mfaEnabled": false,
+        "lastPasswordChange": "2023-11-01T00:00:00.000Z",
+        "securityQuestions": [
+          {
+            "question": "First pet's name?",
+            "answerHash": "$2b$10$dGzqQB4x8Y9XH5vvYwLqVO"
+          }
+        ]
+      },
+      "accessibilitySettings": {
+        "highContrast": false,
+        "fontSize": "medium",
+        "screenReader": false,
+        "reducedMotion": false,
+        "colorBlindMode": "none"
+      },
+      "deviceInfo": [
+        {
+          "deviceId": "d1e89ca0-1234-5678-90ab-cdef12345678",
+          "deviceType": "desktop",
+          "lastLogin": "2023-11-15T12:00:00.000Z",
+          "trustStatus": "trusted"
+        }
+      ],
+      "timestamps": {
+        "createdAt": "2023-01-01T00:00:00.000Z",
+        "lastActive": "2023-11-15T12:00:00.000Z",
+        "lastUpdate": "2023-11-15T12:00:00.000Z",
+        "verifiedAt": "2023-01-01T01:00:00.000Z"
+      },
+      "dataClassification": "TEST_DATA"
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440001",
+      "email": "premium@example.com",
+      "username": "premiumUser",
+      "password": "$2b$10$dGzqQB4x8Y9XH5vvYwLqVOK9Jy2ZGJ3Kj.U5vX9Kj.U5vX9Kj.U5vX",
+      "role": "PREMIUM_USER",
+      "settings": {
+        "theme": "DARK",
+        "notifications": true,
+        "language": "en",
+        "timezone": "Europe/London",
+        "fontScale": 1.2,
+        "highContrast": false
+      },
+      "securityMetadata": {
+        "securityLevel": 2,
+        "isVerified": true,
+        "mfaEnabled": true,
+        "lastPasswordChange": "2023-10-15T00:00:00.000Z",
+        "securityQuestions": [
+          {
+            "question": "Mother's maiden name?",
+            "answerHash": "$2b$10$dGzqQB4x8Y9XH5vvYwLqVO"
+          }
+        ]
+      },
+      "accessibilitySettings": {
+        "highContrast": false,
+        "fontSize": "large",
+        "screenReader": false,
+        "reducedMotion": true,
+        "colorBlindMode": "none"
+      },
+      "deviceInfo": [
+        {
+          "deviceId": "d1e89ca0-1234-5678-90ab-cdef12345679",
+          "deviceType": "mobile",
+          "lastLogin": "2023-11-15T13:00:00.000Z",
+          "trustStatus": "trusted"
+        }
+      ],
+      "timestamps": {
+        "createdAt": "2023-02-01T00:00:00.000Z",
+        "lastActive": "2023-11-15T13:00:00.000Z",
+        "lastUpdate": "2023-11-15T13:00:00.000Z",
+        "verifiedAt": "2023-02-01T01:00:00.000Z"
+      },
+      "dataClassification": "TEST_DATA"
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440002",
+      "email": "moderator@example.com",
+      "username": "moderatorUser",
+      "password": "$2b$10$dGzqQB4x8Y9XH5vvYwLqVOK9Jy2ZGJ3Kj.U5vX9Kj.U5vX9Kj.U5vX",
+      "role": "MODERATOR",
+      "settings": {
+        "theme": "LIGHT",
+        "notifications": true,
+        "language": "en",
+        "timezone": "UTC",
+        "fontScale": 1.0,
+        "highContrast": false
+      },
+      "securityMetadata": {
+        "securityLevel": 3,
+        "isVerified": true,
+        "mfaEnabled": true,
+        "lastPasswordChange": "2023-11-01T00:00:00.000Z",
+        "securityQuestions": [
+          {
+            "question": "High school name?",
+            "answerHash": "$2b$10$dGzqQB4x8Y9XH5vvYwLqVO"
+          }
+        ]
+      },
+      "accessibilitySettings": {
+        "highContrast": false,
+        "fontSize": "medium",
+        "screenReader": false,
+        "reducedMotion": false,
+        "colorBlindMode": "none"
+      },
+      "deviceInfo": [
+        {
+          "deviceId": "d1e89ca0-1234-5678-90ab-cdef12345680",
+          "deviceType": "desktop",
+          "lastLogin": "2023-11-15T14:00:00.000Z",
+          "trustStatus": "trusted"
+        }
+      ],
+      "timestamps": {
+        "createdAt": "2023-03-01T00:00:00.000Z",
+        "lastActive": "2023-11-15T14:00:00.000Z",
+        "lastUpdate": "2023-11-15T14:00:00.000Z",
+        "verifiedAt": "2023-03-01T01:00:00.000Z"
+      },
+      "dataClassification": "TEST_DATA"
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440003",
+      "email": "admin@example.com",
+      "username": "adminUser",
+      "password": "$2b$10$dGzqQB4x8Y9XH5vvYwLqVOK9Jy2ZGJ3Kj.U5vX9Kj.U5vX9Kj.U5vX",
+      "role": "ADMIN",
+      "settings": {
+        "theme": "DARK",
+        "notifications": true,
+        "language": "en",
+        "timezone": "UTC",
+        "fontScale": 1.0,
+        "highContrast": true
+      },
+      "securityMetadata": {
+        "securityLevel": 5,
+        "isVerified": true,
+        "mfaEnabled": true,
+        "lastPasswordChange": "2023-11-01T00:00:00.000Z",
+        "securityQuestions": [
+          {
+            "question": "First car model?",
+            "answerHash": "$2b$10$dGzqQB4x8Y9XH5vvYwLqVO"
+          }
+        ]
+      },
+      "accessibilitySettings": {
+        "highContrast": true,
+        "fontSize": "medium",
+        "screenReader": false,
+        "reducedMotion": false,
+        "colorBlindMode": "none"
+      },
+      "deviceInfo": [
+        {
+          "deviceId": "d1e89ca0-1234-5678-90ab-cdef12345681",
+          "deviceType": "desktop",
+          "lastLogin": "2023-11-15T15:00:00.000Z",
+          "trustStatus": "trusted"
+        }
+      ],
+      "timestamps": {
+        "createdAt": "2023-04-01T00:00:00.000Z",
+        "lastActive": "2023-11-15T15:00:00.000Z",
+        "lastUpdate": "2023-11-15T15:00:00.000Z",
+        "verifiedAt": "2023-04-01T01:00:00.000Z"
+      },
+      "dataClassification": "TEST_DATA"
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440004",
+      "email": "accessibility@example.com",
+      "username": "accessibilityUser",
+      "password": "$2b$10$dGzqQB4x8Y9XH5vvYwLqVOK9Jy2ZGJ3Kj.U5vX9Kj.U5vX9Kj.U5vX",
+      "role": "USER",
+      "settings": {
+        "theme": "LIGHT",
+        "notifications": false,
+        "language": "en",
+        "timezone": "America/Los_Angeles",
+        "fontScale": 1.5,
+        "highContrast": true
+      },
+      "securityMetadata": {
+        "securityLevel": 1,
+        "isVerified": true,
+        "mfaEnabled": true,
+        "lastPasswordChange": "2023-11-01T00:00:00.000Z",
+        "securityQuestions": [
+          {
+            "question": "Childhood street name?",
+            "answerHash": "$2b$10$dGzqQB4x8Y9XH5vvYwLqVO"
+          }
+        ]
+      },
+      "accessibilitySettings": {
+        "highContrast": true,
+        "fontSize": "x-large",
+        "screenReader": true,
+        "reducedMotion": true,
+        "colorBlindMode": "deuteranopia"
+      },
+      "deviceInfo": [
+        {
+          "deviceId": "d1e89ca0-1234-5678-90ab-cdef12345682",
+          "deviceType": "tablet",
+          "lastLogin": "2023-11-15T16:00:00.000Z",
+          "trustStatus": "trusted"
+        }
+      ],
+      "timestamps": {
+        "createdAt": "2023-05-01T00:00:00.000Z",
+        "lastActive": "2023-11-15T16:00:00.000Z",
+        "lastUpdate": "2023-11-15T16:00:00.000Z",
+        "verifiedAt": "2023-05-01T01:00:00.000Z"
+      },
+      "dataClassification": "TEST_DATA"
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440005",
+      "email": "international@example.com",
+      "username": "internationalUser",
+      "password": "$2b$10$dGzqQB4x8Y9XH5vvYwLqVOK9Jy2ZGJ3Kj.U5vX9Kj.U5vX9Kj.U5vX",
+      "role": "USER",
+      "settings": {
+        "theme": "SYSTEM",
+        "notifications": true,
+        "language": "fr",
+        "timezone": "Europe/Paris",
+        "fontScale": 1.0,
+        "highContrast": false
+      },
+      "securityMetadata": {
+        "securityLevel": 1,
+        "isVerified": true,
+        "mfaEnabled": false,
+        "lastPasswordChange": "2023-11-01T00:00:00.000Z",
+        "securityQuestions": [
+          {
+            "question": "Ville de naissance?",
+            "answerHash": "$2b$10$dGzqQB4x8Y9XH5vvYwLqVO"
+          }
+        ]
+      },
+      "accessibilitySettings": {
+        "highContrast": false,
+        "fontSize": "medium",
+        "screenReader": false,
+        "reducedMotion": false,
+        "colorBlindMode": "none"
+      },
+      "deviceInfo": [
+        {
+          "deviceId": "d1e89ca0-1234-5678-90ab-cdef12345683",
+          "deviceType": "mobile",
+          "lastLogin": "2023-11-15T17:00:00.000Z",
+          "trustStatus": "trusted"
+        }
+      ],
+      "timestamps": {
+        "createdAt": "2023-06-01T00:00:00.000Z",
+        "lastActive": "2023-11-15T17:00:00.000Z",
+        "lastUpdate": "2023-11-15T17:00:00.000Z",
+        "verifiedAt": "2023-06-01T01:00:00.000Z"
+      },
+      "dataClassification": "TEST_DATA"
+    }
+  ]
+}
