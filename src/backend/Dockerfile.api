@@ -1,0 +1,85 @@
+# -----------------------------
+# Build Stage
+# -----------------------------
+FROM node:18-alpine AS builder
+
+# Install pnpm with specific version for consistency
+RUN wget -qO /bin/pnpm "https://github.com/pnpm/pnpm/releases/download/v8.0.0/pnpm-linuxstatic-x64" && \
+    chmod +x /bin/pnpm
+
+# Set environment variables
+ENV NODE_ENV=production \
+    PNPM_HOME=/app/.pnpm
+
+# Create app directory and set working directory
+WORKDIR /app
+
+# Copy package files for layer caching
+COPY package.json pnpm-lock.yaml ./
+
+# Install dependencies with frozen lockfile for reproducible builds
+RUN pnpm install --frozen-lockfile --prod
+
+# Copy source code and TypeScript config
+COPY tsconfig.json ./
+COPY src ./src
+
+# Build TypeScript code
+RUN pnpm run build
+
+# Prune development dependencies
+RUN pnpm prune --prod
+
+# -----------------------------
+# Production Stage
+# -----------------------------
+FROM node:18-alpine AS production
+
+# Set production environment variables
+ENV NODE_ENV=production \
+    PORT=3000 \
+    PNPM_HOME=/app/.pnpm
+
+# Create non-root user/group
+RUN addgroup -g 1001 -S node && \
+    adduser -u 1001 -S node -G node
+
+# Set working directory
+WORKDIR /app
+
+# Copy built artifacts from builder stage
+COPY --from=builder --chown=node:node /app/dist ./dist
+COPY --from=builder --chown=node:node /app/node_modules ./node_modules
+COPY --from=builder --chown=node:node /app/package.json ./
+
+# Security hardening
+RUN apk add --no-cache dumb-init && \
+    chmod -R 550 /app && \
+    chmod -R 770 /app/dist/logs
+
+# Container metadata and documentation
+LABEL maintainer="DevOps Team" \
+      service="api-gateway" \
+      version="1.0.0" \
+      environment="production" \
+      security.scan="required"
+
+# Expose API port
+EXPOSE 3000
+
+# Health check configuration
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/health || exit 1
+
+# Set security options
+USER node
+WORKDIR /app
+
+# Use dumb-init as entrypoint to handle signals properly
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+
+# Start the API service
+CMD ["node", "dist/server.js"]
+
+# Resource limits (applied at runtime)
+# docker run --memory="512m" --cpus="1.0" ...
